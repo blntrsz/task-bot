@@ -1,0 +1,26 @@
+{
+  "name": "@task-bot/api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/dev.ts",
+    "build": "esbuild --bundle --outfile=./dist/index.js --platform=node --target=node20 ./src/index.ts",
+    "zip": "zip -j lambda.zip dist/index.js",
+    "update": "aws lambda update-function-code --zip-file fileb://lambda.zip --function-name hello",
+    "deploy": "run-s build zip update"
+  },
+  "devDependencies": {
+    "esbuild": "^0.21.4",
+    "npm-run-all2": "^6.2.0"
+  },
+  "dependencies": {
+    "@aws-lambda-powertools/commons": "^2.8.0",
+    "@aws-lambda-powertools/logger": "^2.8.0",
+    "@hono/node-server": "^1.13.1",
+    "@hono/swagger-ui": "^0.4.1",
+    "@hono/zod-openapi": "^0.16.2",
+    "@task-bot/core": "workspace:*",
+    "hono": "^4.6.3",
+    "tsx": "^4.19.1"
+  }
+}
