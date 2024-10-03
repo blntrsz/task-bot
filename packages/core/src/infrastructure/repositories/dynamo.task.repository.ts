@@ -1,16 +1,16 @@
-import { TaskEntity } from "../domain/task.entity";
+import { TaskEntity } from "#domain/entities/task.entity";
+import { NotFoundException } from "#domain/exceptions/exception";
 import {
   TaskRepository,
   TaskRepositoryContext,
-} from "../domain/task.repository";
-import { NotFoundError } from "../../common/domain-error";
-import { TaskMapper } from "../mapper/task.mapper";
-import { createSegment } from "../../common/observability";
-import { TaskModel } from "./task.dynamo";
+} from "#domain/repositories/task.repository";
+import { useObservability } from "#domain/services/observability";
+import { TaskMapper } from "#infrastructure/mapper/task.mapper";
+import { TaskModel } from "#infrastructure/models/task.model";
 
 export class DynamoTaskRepository implements TaskRepository {
   async findOne(id: string) {
-    return createSegment(
+    return useObservability().createSegment(
       "repository",
       `${DynamoTaskRepository.name}/${this.findOne.name}`,
     )(async () => {
@@ -18,14 +18,14 @@ export class DynamoTaskRepository implements TaskRepository {
         id,
       }).go();
 
-      if (!task.data) throw new NotFoundError();
+      if (!task.data) throw new NotFoundException();
 
       return TaskMapper.fromPersistence(task.data);
     });
   }
 
   async createOne(task: TaskEntity) {
-    return createSegment(
+    return useObservability().createSegment(
       "repository",
       `${DynamoTaskRepository.name}/${this.findOne.name}`,
     )(async () => {
@@ -34,7 +34,7 @@ export class DynamoTaskRepository implements TaskRepository {
   }
 
   async list() {
-    return createSegment(
+    return useObservability().createSegment(
       "repository",
       `${DynamoTaskRepository.name}/${this.list.name}`,
     )(async () => {

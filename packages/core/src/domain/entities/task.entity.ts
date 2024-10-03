@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { Entity } from "../../common/entity";
-import { ValidationError } from "../../common/domain-error";
 import { randomUUID } from "node:crypto";
+import { BaseEntity } from "#domain/common/base-entity";
+import { ValidationException } from "#domain/exceptions/exception";
 
 export const taskSchema = z.object({
   id: z.string().uuid(),
@@ -12,7 +12,7 @@ export const taskSchema = z.object({
 
 export type TaskSchema = z.infer<typeof taskSchema>;
 
-export class TaskEntity extends Entity {
+export class TaskEntity extends BaseEntity {
   data: TaskSchema;
 
   constructor(data: TaskSchema) {
@@ -23,7 +23,7 @@ export class TaskEntity extends Entity {
   validate() {
     const parsedTask = taskSchema.safeParse(this.data);
 
-    if (!parsedTask.success) throw new ValidationError(parsedTask.error);
+    if (!parsedTask.success) throw new ValidationException(parsedTask.error);
   }
 
   static create(data: Pick<TaskSchema, "name">) {

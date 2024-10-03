@@ -1,12 +1,12 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
-import { createTaskUseCase } from "@task-bot/core/task/use-cases/create-task.use-case";
-import { taskSchema } from "@task-bot/core/task/domain/task.entity";
+import { createApi } from "../../utils/create-api";
+import { taskSchema } from "@task-bot/core/domain/entities/task.entity";
 import {
   TaskMapper,
   taskResponseSchema,
-} from "@task-bot/core/task/mapper/task.mapper";
-import { createApi } from "../../utils/create-api";
-import { DomainError } from "@task-bot/core/common/domain-error";
+} from "@task-bot/core/infrastructure/mapper/task.mapper";
+import { Exception } from "@task-bot/core/domain/exceptions/exception";
+import { createTaskUseCase } from "@task-bot/core/use-cases/task/create-task.use-case";
 
 export const createTask = new OpenAPIHono().openapi(
   createRoute({
@@ -45,7 +45,7 @@ export const createTask = new OpenAPIHono().openapi(
         });
         return c.json(TaskMapper.toResponse(task), 201);
       } catch (error) {
-        if (error instanceof DomainError) {
+        if (error instanceof Exception) {
           return c.json(error.message, 400);
         }
 

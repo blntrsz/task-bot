@@ -1,6 +1,9 @@
+import { ValidationException } from "#domain/exceptions/exception";
+import {
+  ObservabilityResources,
+  useObservability,
+} from "#domain/services/observability";
 import { z, ZodTypeAny } from "zod";
-import { createSegment, ObservabilityResources } from "./observability";
-import { ValidationError } from "./domain-error";
 
 export function useCase(useCaseName: string) {
   return function <TSchema extends ZodTypeAny>(schema?: TSchema) {
@@ -11,13 +14,13 @@ export function useCase(useCaseName: string) {
       ) => Promise<T>,
     ) {
       return function (input: z.infer<TSchema>) {
-        return createSegment(
+        return useObservability().createSegment(
           "useCaseName",
           useCaseName,
         )(async (props) => {
           const parsedInput = schema?.safeParse(input);
           if (parsedInput && !parsedInput.success) {
-            throw new ValidationError(parsedInput.error);
+            throw new ValidationException(parsedInput.error);
           }
 
           return await cb(parsedInput?.data, props);

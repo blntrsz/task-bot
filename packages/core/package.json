@@ -2,6 +2,9 @@
   "name": "@task-bot/core",
   "version": "1.0.0",
   "type": "module",
+  "imports": {
+    "#*": "./src/*.ts"
+  },
   "exports": {
     "./*": "./src/*.ts"
   },

@@ -1,11 +1,11 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
-import { taskSchema } from "@task-bot/core/task/domain/task.entity";
-import { findOneTaskUseCase } from "@task-bot/core/task/use-cases/find-one-task.use-case";
+import { createApi } from "../../utils/create-api";
+import { taskSchema } from "@task-bot/core/domain/entities/task.entity";
 import {
   TaskMapper,
   taskResponseSchema,
-} from "@task-bot/core/task/mapper/task.mapper";
-import { createApi } from "../../utils/create-api";
+} from "@task-bot/core/infrastructure/mapper/task.mapper";
+import { findOneTaskUseCase } from "@task-bot/core/use-cases/task/find-one-task.use-case";
 
 export const findOneTask = new OpenAPIHono().openapi(
   createRoute({

@@ -1,9 +1,9 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { useObservability } from "@task-bot/core/common/observability";
 import { swaggerUI } from "@hono/swagger-ui";
 import { createTask } from "./routes/tasks/create-task";
 import { findOneTask } from "./routes/tasks/find-one-task";
 import { listTasks } from "./routes/tasks/list-tasks";
+import { useObservability } from "@task-bot/core/domain/services/observability";
 
 export const app = new OpenAPIHono();
 app.onError(async (error, c) => {

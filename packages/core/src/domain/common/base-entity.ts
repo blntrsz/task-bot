@@ -1,6 +1,6 @@
 import { DomainEvent } from "./domain-event";
 
-export class Entity {
+export class BaseEntity {
   domainEvents: DomainEvent[];
 
   constructor() {
