@@ -1,9 +1,5 @@
 import * as cdk from "aws-cdk-lib";
-import {
-  LambdaIntegration,
-  MethodLoggingLevel,
-  RestApi,
-} from "aws-cdk-lib/aws-apigateway";
+import { LambdaIntegration, RestApi } from "aws-cdk-lib/aws-apigateway";
 import { Table } from "aws-cdk-lib/aws-dynamodb";
 import { Runtime, Tracing } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";

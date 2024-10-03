@@ -1,12 +1,14 @@
 import { withObservability } from "@task-bot/core/common/observability";
 import { withDynamoTaskRepository } from "@task-bot/core/task/infrastructure/dynamo.task.repository";
+import { withEventBridgeEventEmitter } from "@task-bot/core/common/event-emitter";
 
 export const dependencies = [
+  // setup
+  withObservability,
+  withEventBridgeEventEmitter,
+
   // repositories
   withDynamoTaskRepository,
-
-  // utils
-  withObservability,
 ];
 
 export function inject(d: Function[], fn: Function) {

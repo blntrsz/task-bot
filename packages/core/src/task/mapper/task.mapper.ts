@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { Task } from "../domain/task.entity";
-import { TaskEntity } from "../infrastructure/dynamo.task.repository";
+import { TaskEntity } from "../domain/task.entity";
+import { TaskModel } from "../infrastructure/task.dynamo";
 
 export const taskResponseSchema = z.object({
   id: z.string(),
@@ -13,7 +13,7 @@ export const taskResponseSchema = z.object({
 });
 
 export namespace TaskMapper {
-  export function toPersistence({ data }: Task): TaskEntity {
+  export function toPersistence({ data }: TaskEntity): TaskModel {
     return {
       id: data.id,
       name: data.name,
@@ -22,8 +22,8 @@ export namespace TaskMapper {
     };
   }
 
-  export function fromPersistence(task: TaskEntity): Task {
-    return new Task({
+  export function fromPersistence(task: TaskModel): TaskEntity {
+    return new TaskEntity({
       id: task.id,
       name: task.name,
       updatedAt: new Date(task.updated_at),
@@ -33,7 +33,7 @@ export namespace TaskMapper {
 
   export function toResponse({
     data,
-  }: Task): z.infer<typeof taskResponseSchema> {
+  }: TaskEntity): z.infer<typeof taskResponseSchema> {
     return {
       id: data.id,
       type: "tasks",

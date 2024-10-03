@@ -162,13 +162,12 @@ importers:
       electrodb:
         specifier: ^2.15.0
         version: 2.15.0(@aws-sdk/client-dynamodb@3.662.0)
+      typescript:
+        specifier: ^5.6.2
+        version: 5.6.2
       zod:
         specifier: ^3.23.8
         version: 3.23.8
-    devDependencies:
-      '@types/better-sqlite3':
-        specifier: ^7.6.11
-        version: 7.6.11
 
 packages:
 
@@ -1348,9 +1347,6 @@ packages:
 
   '@types/babel__traverse@7.20.6':
     resolution: {integrity: sha512-r1bzfrm0tomOI8g1SzvCaQHo6Lcv6zu0EA+W2kHrt8dyrHQxGzBBL4kdkzIS+jBMV+EYcMAEAqXqYaLJq5rOZg==}
-
-  '@types/better-sqlite3@7.6.11':
-    resolution: {integrity: sha512-i8KcD3PgGtGBLl3+mMYA8PdKkButvPyARxA7IQAd6qeslht13qxb1zzO8dRCtE7U3IoJS782zDBAeoKiM695kg==}
 
   '@types/body-parser@1.19.5':
     resolution: {integrity: sha512-fB3Zu92ucau0iQ0JMCFQE7b/dv8Ot07NI3KaZIkIUNXq82k4eBAqUaneXfleGY9JWskeS9y+u0nXMyspcuQrCg==}
@@ -4568,10 +4564,6 @@ snapshots:
   '@types/babel__traverse@7.20.6':
     dependencies:
       '@babel/types': 7.25.6
-
-  '@types/better-sqlite3@7.6.11':
-    dependencies:
-      '@types/node': 22.7.4
 
   '@types/body-parser@1.19.5':
     dependencies:

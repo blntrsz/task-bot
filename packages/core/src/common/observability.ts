@@ -2,6 +2,7 @@ import { Logger } from "@aws-lambda-powertools/logger";
 import { createContext } from "./context";
 import { Tracer } from "@aws-lambda-powertools/tracer";
 import { MetricUnit, Metrics } from "@aws-lambda-powertools/metrics";
+import { DomainError } from "./domain-error";
 
 export const SERVICE_NAME = "TaskBot";
 
@@ -45,8 +46,8 @@ export function createSegment(key: string, value: string) {
       const response = await cb({ tracer, logger, metrics });
       metrics.addMetric(value, MetricUnit.Count, 1);
       return response;
-    } catch (error) {
-      if (error.traced) {
+    } catch (error: any) {
+      if (error.traced || error instanceof DomainError) {
         throw error;
       }
 

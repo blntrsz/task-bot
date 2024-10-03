@@ -15,11 +15,7 @@ export const listTasks = new OpenAPIHono().openapi(
   }),
   async (c) => {
     return createApi(c)(async () => {
-      const [error, tasks] = await listTasksUseCase({});
-
-      if (error) {
-        return c.json(error, 400);
-      }
+      const tasks = await listTasksUseCase({});
 
       return c.json(tasks.map((task) => TaskMapper.toResponse(task)));
     });

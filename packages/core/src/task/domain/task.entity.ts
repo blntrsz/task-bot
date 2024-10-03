@@ -12,7 +12,7 @@ export const taskSchema = z.object({
 
 export type TaskSchema = z.infer<typeof taskSchema>;
 
-export class Task extends Entity {
+export class TaskEntity extends Entity {
   data: TaskSchema;
 
   constructor(data: TaskSchema) {
@@ -23,20 +23,19 @@ export class Task extends Entity {
   validate() {
     const parsedTask = taskSchema.safeParse(this.data);
 
-    if (!parsedTask.success) return new ValidationError(parsedTask.error);
+    if (!parsedTask.success) throw new ValidationError(parsedTask.error);
   }
 
   static create(data: Pick<TaskSchema, "name">) {
-    const task = new Task({
+    const task = new TaskEntity({
       id: randomUUID(),
       name: data.name,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
 
-    const err = task.validate();
-    if (err) return [err, undefined] as const;
+    task.validate();
 
-    return [undefined, task] as const;
+    return task;
   }
 }

@@ -4,7 +4,6 @@ import { swaggerUI } from "@hono/swagger-ui";
 import { createTask } from "./routes/tasks/create-task";
 import { findOneTask } from "./routes/tasks/find-one-task";
 import { listTasks } from "./routes/tasks/list-tasks";
-import { hc } from "hono/client";
 
 export const app = new OpenAPIHono();
 app.onError(async (error, c) => {

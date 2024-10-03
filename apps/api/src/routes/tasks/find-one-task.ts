@@ -28,11 +28,7 @@ export const findOneTask = new OpenAPIHono().openapi(
   async (c) => {
     return createApi(c)(async () => {
       const { id } = c.req.valid("param");
-      const [error, task] = await findOneTaskUseCase({ id });
-
-      if (error) {
-        throw c.json(error, 400);
-      }
+      const task = await findOneTaskUseCase({ id });
 
       return c.json(TaskMapper.toResponse(task), 200);
     });

@@ -6,6 +6,7 @@ import {
   taskResponseSchema,
 } from "@task-bot/core/task/mapper/task.mapper";
 import { createApi } from "../../utils/create-api";
+import { DomainError } from "@task-bot/core/common/domain-error";
 
 export const createTask = new OpenAPIHono().openapi(
   createRoute({
@@ -29,17 +30,27 @@ export const createTask = new OpenAPIHono().openapi(
           },
         },
       },
+      400: {
+        description: "",
+      },
     },
   }),
   async (c) => {
     return createApi(c)(async () => {
-      const [error, task] = await createTaskUseCase({
-        name: "",
-      });
-      if (error) {
-        throw c.json(error, 400);
+      const { name } = c.req.valid("json");
+
+      try {
+        const task = await createTaskUseCase({
+          name,
+        });
+        return c.json(TaskMapper.toResponse(task), 201);
+      } catch (error) {
+        if (error instanceof DomainError) {
+          return c.json(error.message, 400);
+        }
+
+        throw error;
       }
-      return c.json(TaskMapper.toResponse(task), 201);
     });
   },
 );
