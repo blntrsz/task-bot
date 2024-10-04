@@ -2,6 +2,9 @@
   "name": "@task-bot/api",
   "version": "1.0.0",
   "type": "module",
+  "imports": {
+    "#*": "./src/*.ts"
+  },
   "scripts": {
     "dev": "tsx src/dev.ts",
     "build": "esbuild --bundle --outfile=./dist/index.js --platform=node --target=node20 ./src/index.ts",

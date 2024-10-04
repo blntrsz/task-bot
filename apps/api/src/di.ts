@@ -1,6 +1,6 @@
-import { withDynamoTaskRepository } from "@task-bot/core/infrastructure/repositories/dynamo.task.repository";
-import { withEventBridgeEventEmitter } from "@task-bot/core/infrastructure/services/event-bridge.event-emitter";
-import { withObservability } from "@task-bot/core/infrastructure/services/aws.observability";
+import { withDynamoTaskRepository } from "@task-bot/core/task/infrastructure/dynamo.task.repository";
+import { withObservability } from "@task-bot/core/common/infrastructure/services/aws.observability";
+import { withEventBridgeEventEmitter } from "@task-bot/core/common/infrastructure/services/event-bridge.event-emitter";
 
 export const dependencies = [
   // setup

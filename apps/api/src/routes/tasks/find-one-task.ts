@@ -1,11 +1,11 @@
+import { createApi } from "#utils/create-api";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
-import { createApi } from "../../utils/create-api";
-import { taskSchema } from "@task-bot/core/domain/entities/task.entity";
+import { taskSchema } from "@task-bot/core/task/domain/task.entity";
 import {
   TaskMapper,
   taskResponseSchema,
-} from "@task-bot/core/infrastructure/mapper/task.mapper";
-import { findOneTaskUseCase } from "@task-bot/core/use-cases/task/find-one-task.use-case";
+} from "@task-bot/core/task/infrastructure/task.mapper";
+import { FindOneTaskUseCase } from "@task-bot/core/task/use-cases/find-one-task.use-case";
 
 export const findOneTask = new OpenAPIHono().openapi(
   createRoute({
@@ -28,7 +28,7 @@ export const findOneTask = new OpenAPIHono().openapi(
   async (c) => {
     return createApi(c)(async () => {
       const { id } = c.req.valid("param");
-      const task = await findOneTaskUseCase({ id });
+      const task = await new FindOneTaskUseCase().execute({ id });
 
       return c.json(TaskMapper.toResponse(task), 200);
     });

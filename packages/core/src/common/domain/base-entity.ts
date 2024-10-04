@@ -11,12 +11,10 @@ export class BaseEntity {
     this.domainEvents.push(e);
   }
 
-  async consumeEvents(consumer: (event: DomainEvent) => Promise<void>) {
-    await Promise.all(
-      this.domainEvents.map((e) => {
-        return consumer(e);
-      }),
-    );
+  consumeEvents() {
+    const copy = [...this.domainEvents];
     this.domainEvents = [];
+
+    return copy;
   }
 }

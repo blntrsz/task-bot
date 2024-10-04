@@ -1,12 +1,12 @@
-import { DomainEvent } from "#domain/common/domain-event";
+import { DomainEvent } from "#common/domain/domain-event";
 import {
   EventEmitter,
   EventEmitterContext,
-} from "#domain/services/event-emitter";
+} from "#common/domain/services/event-emitter";
 
 class EventBridgeEventEmitter implements EventEmitter {
-  async emit(event: DomainEvent) {
-    console.log(event);
+  async emit(events: DomainEvent[]) {
+    console.log(events);
   }
 }
 

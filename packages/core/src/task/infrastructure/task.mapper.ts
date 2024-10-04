@@ -1,6 +1,6 @@
-import { TaskEntity } from "#domain/entities/task.entity";
-import { TaskModel } from "#infrastructure/models/task.model";
+import { TaskEntity } from "#task/domain/task.entity";
 import { z } from "zod";
+import { TaskModel } from "./task.model";
 
 export const taskResponseSchema = z.object({
   id: z.string(),

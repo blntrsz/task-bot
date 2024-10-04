@@ -1,4 +1,4 @@
-import { useObservability } from "@task-bot/core/domain/services/observability";
+import { useObservability } from "@task-bot/core/common/domain/services/observability";
 import { Context } from "hono";
 
 export function createApi(c: Context) {

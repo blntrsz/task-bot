@@ -1,7 +1,7 @@
 import { handle } from "hono/aws-lambda";
 import { app } from "./application";
 import { dependencies, inject } from "./di";
-import { useObservability } from "@task-bot/core/domain/services/observability";
+import { useObservability } from "@task-bot/core/common/domain/services/observability";
 
 export function handler(event: any, context: any) {
   return inject(dependencies, () => {

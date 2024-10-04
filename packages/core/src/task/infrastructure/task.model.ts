@@ -1,4 +1,4 @@
-import { client } from "#infrastructure/common/dynamodb";
+import { client } from "#common/infrastructure/clients/dynamodb.client";
 import { Entity, EntityItem } from "electrodb";
 
 export const TaskModel = new Entity(

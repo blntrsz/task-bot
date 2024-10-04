@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
-import { BaseEntity } from "#domain/common/base-entity";
-import { ValidationException } from "#domain/exceptions/exception";
+import { BaseEntity } from "#common/domain/base-entity";
+import { ValidationException } from "#common/domain/exception";
 
 export const taskSchema = z.object({
   id: z.string().uuid(),

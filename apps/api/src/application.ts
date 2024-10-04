@@ -1,11 +1,17 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { swaggerUI } from "@hono/swagger-ui";
+import { StatusCode } from "hono/utils/http-status";
+import {
+  Exception,
+  exceptionToResponse,
+} from "@task-bot/core/common/domain/exception";
+import { listTasks } from "./routes/tasks/list-tasks";
 import { createTask } from "./routes/tasks/create-task";
 import { findOneTask } from "./routes/tasks/find-one-task";
-import { listTasks } from "./routes/tasks/list-tasks";
-import { useObservability } from "@task-bot/core/domain/services/observability";
+import { useObservability } from "@task-bot/core/common/domain/services/observability";
 
 export const app = new OpenAPIHono();
+
 app.onError(async (error, c) => {
   const { tracer, logger } = useObservability();
   const rootTraceId = tracer.getRootXrayTraceId();
@@ -21,6 +27,11 @@ app.onError(async (error, c) => {
   if (!error.traced) {
     tracer.addErrorAsMetadata(error);
     logger.error(error.message);
+  }
+
+  if (error instanceof Exception) {
+    const { json, status } = exceptionToResponse(error);
+    return c.json(json, status as StatusCode);
   }
 
   return c.json(
@@ -46,8 +57,8 @@ app.doc("/doc", {
 });
 
 const routes = app
+  .route("/", listTasks)
   .route("/", createTask)
-  .route("/", findOneTask)
-  .route("/", listTasks);
+  .route("/", findOneTask);
 
 export type Route = typeof routes;

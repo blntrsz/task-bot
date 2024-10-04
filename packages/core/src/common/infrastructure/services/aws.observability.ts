@@ -1,9 +1,9 @@
-import { Exception } from "#domain/exceptions/exception";
+import { Exception } from "#common/domain/exception";
 import {
   ObservabilityContext,
   ObservabilityResources,
   useObservability,
-} from "#domain/services/observability";
+} from "#common/domain/services/observability";
 import { Logger } from "@aws-lambda-powertools/logger";
 import { MetricUnit, Metrics } from "@aws-lambda-powertools/metrics";
 import { Tracer } from "@aws-lambda-powertools/tracer";

@@ -22,3 +22,24 @@ export interface Observability {
 
 export const ObservabilityContext = createContext<Observability>();
 export const useObservability = ObservabilityContext.use;
+
+export function Observe(key: "use-case" | "api-path" | "repository") {
+  return function (
+    target: Object,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
+    const originalMethod = descriptor.value;
+    const value = `${target.constructor.name}.${propertyKey}`;
+
+    descriptor.value = function (...args: any[]) {
+      return useObservability().createSegment(
+        key,
+        value,
+      )(() => {
+        return originalMethod.apply(this, args);
+      });
+    };
+    return descriptor;
+  };
+}
