@@ -1,8 +1,5 @@
 import { BaseEntity } from "#common/domain/base-entity";
-import {
-  EventEmitter,
-  EventEmitterContext,
-} from "#common/domain/services/event-emitter";
+import { EventEmitter } from "#common/domain/services/event-emitter";
 import { ZodTypeAny } from "zod";
 
 export class EventBridgeEventEmitter implements EventEmitter {
@@ -15,7 +12,3 @@ export class EventBridgeEventEmitter implements EventEmitter {
     console.log(events);
   }
 }
-
-export const withEventBridgeEventEmitter = EventEmitterContext.with(
-  new EventBridgeEventEmitter(),
-);

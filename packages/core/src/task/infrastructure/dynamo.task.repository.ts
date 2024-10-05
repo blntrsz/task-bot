@@ -2,10 +2,7 @@ import { BaseRepository } from "#common/domain/base-repository";
 import { NotFoundException } from "#common/domain/exception";
 import { Observe } from "#common/domain/services/observability";
 import { TaskEntity } from "#task/domain/task.entity";
-import {
-  TaskRepository,
-  TaskRepositoryContext,
-} from "#task/domain/task.repository";
+import { TaskRepository } from "#task/domain/task.repository";
 import { TaskMapper } from "./task.mapper";
 import { TaskModel } from "./task.model";
 
@@ -47,7 +44,3 @@ export class DynamoTaskRepository
     }).go();
   }
 }
-
-export const withDynamoTaskRepository = TaskRepositoryContext.with(
-  new DynamoTaskRepository(),
-);

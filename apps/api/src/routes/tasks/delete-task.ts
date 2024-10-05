@@ -1,32 +1,27 @@
 import { createApi } from "#utils/create-api";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { taskSchema } from "@task-bot/core/task/domain/task.entity";
 import {
   TaskMapper,
   taskResponseSchema,
 } from "@task-bot/core/task/infrastructure/task.mapper";
-import { CreateTaskUseCase } from "@task-bot/core/task/use-cases/create-task.use-case";
+import { DeleteTaskUseCase } from "@task-bot/core/task/use-cases/delete-task.use-case";
 
 export const createTask = new OpenAPIHono().openapi(
   createRoute({
-    path: "/tasks",
-    method: "post",
+    path: "/tasks/{id}",
+    method: "delete",
     request: {
-      body: {
-        content: {
-          "application/json": {
-            schema: taskSchema.pick({ name: true }),
-          },
-        },
-      },
+      params: z.object({
+        id: z.string(),
+      }),
     },
     responses: {
-      201: {
+      200: {
         description: "Create",
         content: {
           "application/json": {
             schema: z.object({
-              data: taskResponseSchema,
+              data: taskResponseSchema.pick({ id: true, type: true }),
             }),
           },
         },
@@ -35,16 +30,20 @@ export const createTask = new OpenAPIHono().openapi(
   }),
   async (c) => {
     return createApi(c)(async () => {
-      const { name } = c.req.valid("json");
+      const { id } = c.req.valid("param");
 
-      const task = await new CreateTaskUseCase().execute({
-        name,
+      const task = await new DeleteTaskUseCase().execute({
+        id,
       });
+      const response = TaskMapper.toResponse(task);
       return c.json(
         {
-          data: TaskMapper.toResponse(task),
+          data: {
+            id: response.id,
+            type: response.type,
+          },
         },
-        201,
+        200,
       );
     });
   },

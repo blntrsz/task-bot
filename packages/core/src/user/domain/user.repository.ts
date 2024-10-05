@@ -1,8 +1,9 @@
-import { createContext } from "#common/context";
 import { BaseRepository } from "#common/domain/base-repository";
+import { useContainer } from "#common/domain/container";
 import { SessionSchema } from "./session.value-object";
 import { UserEntity, UserSchema } from "./user.entity";
 
+export const USER_REPOSITORY_DI_TOKEN = "user-repository-di-token";
 export interface UserRepository extends BaseRepository<UserEntity> {
   findOne(
     id: UserSchema["id"],
@@ -17,5 +18,5 @@ export interface UserRepository extends BaseRepository<UserEntity> {
   remove(user: UserEntity): Promise<void>;
 }
 
-export const UserRepositoryContext = createContext<UserRepository>();
-export const useUserRepository = UserRepositoryContext.use;
+export const useUserRepository = () =>
+  useContainer<UserRepository>(USER_REPOSITORY_DI_TOKEN);

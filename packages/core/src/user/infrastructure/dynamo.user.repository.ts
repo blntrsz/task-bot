@@ -2,10 +2,7 @@ import { BaseRepository } from "#common/domain/base-repository";
 import { NotFoundException } from "#common/domain/exception";
 import { SessionSchema } from "#user/domain/session.value-object";
 import { UserSchema, UserEntity } from "#user/domain/user.entity";
-import {
-  UserRepository,
-  UserRepositoryContext,
-} from "#user/domain/user.repository";
+import { UserRepository } from "#user/domain/user.repository";
 import { PasswordModel } from "./password.model";
 import { SessionModel } from "./session.model";
 import { UserMapper } from "./user.mapper";
@@ -135,7 +132,3 @@ export class DynamoUserRepository
     return UserMapper.fromPersistence(user.item, password.item, session?.item);
   }
 }
-
-export const withDynamoUserRepository = UserRepositoryContext.with(
-  new DynamoUserRepository(),
-);

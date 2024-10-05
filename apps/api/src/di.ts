@@ -1,25 +1,20 @@
-import { withDynamoTaskRepository } from "@task-bot/core/task/infrastructure/dynamo.task.repository";
-import { withObservability } from "@task-bot/core/common/infrastructure/services/aws.observability";
-import { withEventBridgeEventEmitter } from "@task-bot/core/common/infrastructure/services/event-bridge.event-emitter";
-import { withDynamoUserRepository } from "@task-bot/core/user/infrastructure/dynamo.user.repository";
+import { EventBridgeEventEmitter } from "@task-bot/core/common/infrastructure/services/event-bridge.event-emitter";
+import { EVENT_EMITTER_DI_TOKEN } from "@task-bot/core/common/domain/services/event-emitter";
+import { OBSERVABILITY_DI_TOKEN } from "@task-bot/core/common/domain/services/observability";
+import { AwsObservability } from "@task-bot/core/common/infrastructure/services/aws.observability";
+import { DynamoTaskRepository } from "@task-bot/core/task/infrastructure/dynamo.task.repository";
+import { DynamoUserRepository } from "@task-bot/core/user/infrastructure/dynamo.user.repository";
+import { Container } from "@task-bot/core/common/domain/container";
 
-export const dependencies = [
-  // setup
-  withObservability,
-  withEventBridgeEventEmitter,
+export function createContainer() {
+  const container = new Container();
+
+  container.addDependency(EVENT_EMITTER_DI_TOKEN, EventBridgeEventEmitter);
+  container.addDependency(OBSERVABILITY_DI_TOKEN, AwsObservability);
 
   // repositories
-  withDynamoUserRepository,
-  withDynamoTaskRepository,
-];
+  container.addDependency(OBSERVABILITY_DI_TOKEN, DynamoTaskRepository);
+  container.addDependency(OBSERVABILITY_DI_TOKEN, DynamoUserRepository);
 
-export function inject(d: Function[], fn: Function) {
-  if (d.length > 1) {
-    const [firstDependency, ...otherDependencies] = d;
-
-    return firstDependency(() => inject(otherDependencies, fn));
-  }
-
-  const [firstDependency] = d;
-  return firstDependency(() => fn());
+  return container;
 }

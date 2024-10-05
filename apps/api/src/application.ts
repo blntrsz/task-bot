@@ -9,8 +9,14 @@ import { listTasks } from "./routes/tasks/list-tasks";
 import { createTask } from "./routes/tasks/create-task";
 import { findOneTask } from "./routes/tasks/find-one-task";
 import { useObservability } from "@task-bot/core/common/domain/services/observability";
+// import { getCookie } from "hono/cookie";
 
 export const app = new OpenAPIHono();
+
+// app.use((c, next) => {
+//   const yummyCookie = getCookie(c, "_session");
+//   return next;
+// });
 
 app.onError(async (error, c) => {
   const { tracer, logger } = useObservability();

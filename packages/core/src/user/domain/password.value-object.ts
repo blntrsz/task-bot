@@ -10,14 +10,16 @@ export const passwordSchema = z.object({
 });
 export type PasswordSchema = z.infer<typeof passwordSchema>;
 
-const createSchema = passwordSchema.pick({ userId: true }).extend({
-  password: z.string().min(8),
-});
+export const createPasswordSchema = passwordSchema
+  .pick({ userId: true })
+  .extend({
+    password: z.string().min(8),
+  });
 
 export class Password extends ValueObject<typeof passwordSchema> {
   schema = passwordSchema;
 
-  static create(data: z.infer<typeof createSchema>) {
+  static create(data: z.infer<typeof createPasswordSchema>) {
     const now = new Date();
     const password = new Password({
       hash: bcrypt.hashSync(data.password, 10),

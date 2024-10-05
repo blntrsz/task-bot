@@ -1,6 +1,6 @@
 import { Exception } from "#common/domain/exception";
 import {
-  ObservabilityContext,
+  Observability,
   ObservabilityResources,
   useObservability,
 } from "#common/domain/services/observability";
@@ -17,62 +17,60 @@ const metrics = new Metrics({
   namespace: SERVICE_NAME,
 });
 
-function createSegment(key: string, value: string) {
-  return async function <T>(
-    cb: (resources: ObservabilityResources) => Promise<T>,
-  ) {
-    const start = Date.now();
-    const { tracer, logger, metrics } = useObservability();
-    const parentSegment = tracer.getSegment();
-    const subSegment = parentSegment?.addNewSubsegment(value);
-    subSegment && tracer.setSegment(subSegment);
+export class AwsObservability implements Observability {
+  tracer = tracer;
+  logger = logger;
+  metrics = metrics;
 
-    logger.appendKeys({
-      [key]: value,
-    });
+  setup(event: any, context: any) {
+    const { logger, metrics } = useObservability();
 
-    try {
-      const response = await cb({ tracer, logger, metrics });
-      metrics.addMetric(value, MetricUnit.Count, 1);
-      return response;
-    } catch (error: any) {
-      if (error.traced || error instanceof Exception) {
+    // logger setup
+    logger.logEventIfEnabled(event);
+    logger.addContext(context);
+
+    // metrics setup
+    metrics.captureColdStartMetric();
+  }
+
+  createSegment(key: string, value: string) {
+    return async function <T>(
+      cb: (resources: ObservabilityResources) => Promise<T>,
+    ) {
+      const start = Date.now();
+      const { tracer, logger, metrics } = useObservability();
+      const parentSegment = tracer.getSegment();
+      const subSegment = parentSegment?.addNewSubsegment(value);
+      subSegment && tracer.setSegment(subSegment);
+
+      logger.appendKeys({
+        [key]: value,
+      });
+
+      try {
+        const response = await cb({ tracer, logger, metrics });
+        metrics.addMetric(value, MetricUnit.Count, 1);
+        return response;
+      } catch (error: any) {
+        if (error.traced || error instanceof Exception) {
+          throw error;
+        }
+
+        tracer.addErrorAsMetadata(error);
+        logger.error(error);
+        error.traced = true;
+
         throw error;
+      } finally {
+        metrics.addMetric(
+          `${key}: ${value}`,
+          MetricUnit.Milliseconds,
+          Date.now() - start,
+        );
+        metrics.publishStoredMetrics();
+        subSegment?.close();
+        parentSegment && tracer.setSegment(parentSegment);
       }
-
-      tracer.addErrorAsMetadata(error);
-      logger.error(error);
-      error.traced = true;
-
-      throw error;
-    } finally {
-      metrics.addMetric(
-        `${key}: ${value}`,
-        MetricUnit.Milliseconds,
-        Date.now() - start,
-      );
-      metrics.publishStoredMetrics();
-      subSegment?.close();
-      parentSegment && tracer.setSegment(parentSegment);
-    }
-  };
+    };
+  }
 }
-
-function setup(event: any, context: any) {
-  const { logger, metrics } = useObservability();
-
-  // logger setup
-  logger.logEventIfEnabled(event);
-  logger.addContext(context);
-
-  // metrics setup
-  metrics.captureColdStartMetric();
-}
-
-export const withObservability = ObservabilityContext.with({
-  logger,
-  tracer,
-  metrics,
-  setup,
-  createSegment,
-});

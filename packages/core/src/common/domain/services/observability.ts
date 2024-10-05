@@ -1,8 +1,9 @@
-import { createContext } from "#common/context";
 import { Logger } from "@aws-lambda-powertools/logger";
 import { Metrics } from "@aws-lambda-powertools/metrics";
 import { Tracer } from "@aws-lambda-powertools/tracer";
+import { useContainer } from "../container";
 
+export const OBSERVABILITY_DI_TOKEN = "observability-di-token";
 export type ObservabilityResources = Pick<
   Observability,
   "tracer" | "logger" | "metrics"
@@ -20,9 +21,6 @@ export interface Observability {
   ): <T>(cb: (resources: ObservabilityResources) => Promise<T>) => Promise<T>;
 }
 
-export const ObservabilityContext = createContext<Observability>();
-export const useObservability = ObservabilityContext.use;
-
 export function Observe(key: "use-case" | "api-path" | "repository") {
   return function (
     target: Object,
@@ -33,7 +31,8 @@ export function Observe(key: "use-case" | "api-path" | "repository") {
     const value = `${target.constructor.name}.${propertyKey}`;
 
     descriptor.value = function (...args: any[]) {
-      return useObservability().createSegment(
+      const observability = useObservability();
+      return observability.createSegment(
         key,
         value,
       )(() => {
@@ -43,3 +42,6 @@ export function Observe(key: "use-case" | "api-path" | "repository") {
     return descriptor;
   };
 }
+
+export const useObservability = () =>
+  useContainer<Observability>(OBSERVABILITY_DI_TOKEN);

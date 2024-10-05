@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "type": "module",
   "private": true,
-  "type": "module",
   "scripts": {
     "dev": "vite",
+    "typecheck": "tsc --noEmit",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"

@@ -4,34 +4,25 @@ import { Table } from "aws-cdk-lib/aws-dynamodb";
 import { Runtime, Tracing } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
+import { SPADeploy } from "cdk-spa-deploy";
 
 export class InfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const table = new Table(this, "table", {
-      partitionKey: {
-        name: "pk",
-        type: cdk.aws_dynamodb.AttributeType.STRING,
-      },
-      sortKey: {
-        name: "sk",
-        type: cdk.aws_dynamodb.AttributeType.STRING,
-      },
-      timeToLiveAttribute: "expired_at",
-    });
-    table.addGlobalSecondaryIndex({
-      indexName: "gsi1pk-gsi1sk-index",
-      partitionKey: {
-        name: "gsi1pk",
-        type: cdk.aws_dynamodb.AttributeType.STRING,
-      },
-      sortKey: {
-        name: "gsi1sk",
-        type: cdk.aws_dynamodb.AttributeType.STRING,
-      },
-    });
+    const { fn, api } = this.createApi();
+    const table = this.createTable();
+    this.createSpa();
 
+    fn.addEnvironment("TABLE_NAME", table.tableName);
+    table.grantReadWriteData(fn);
+
+    new cdk.CfnOutput(this, "api-url", {
+      value: api.url,
+    });
+  }
+
+  private createApi() {
     const fn = new NodejsFunction(this, "lambda", {
       entry: "../api/src/index.ts",
       tracing: Tracing.ACTIVE,
@@ -41,7 +32,6 @@ export class InfraStack extends cdk.Stack {
       memorySize: 1024,
       environment: {
         NODE_OPTIONS: "--enable-source-maps",
-        TABLE_NAME: table.tableName,
       },
       bundling: {
         sourceMap: true,
@@ -58,8 +48,6 @@ export class InfraStack extends cdk.Stack {
         },
       },
     });
-
-    table.grantReadWriteData(fn);
 
     const api = new RestApi(this, "api", {
       deployOptions: {
@@ -80,8 +68,41 @@ export class InfraStack extends cdk.Stack {
     const taskById = tasks.addResource("{proxy+}");
     taskById.addMethod("GET", lambdaIntegration);
 
-    new cdk.CfnOutput(this, "api-url", {
-      value: api.url,
+    return { fn, api };
+  }
+
+  private createTable() {
+    const table = new Table(this, "table", {
+      partitionKey: {
+        name: "pk",
+        type: cdk.aws_dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: "sk",
+        type: cdk.aws_dynamodb.AttributeType.STRING,
+      },
+      timeToLiveAttribute: "expired_at",
+    });
+
+    table.addGlobalSecondaryIndex({
+      indexName: "gsi1pk-gsi1sk-index",
+      partitionKey: {
+        name: "gsi1pk",
+        type: cdk.aws_dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: "gsi1sk",
+        type: cdk.aws_dynamodb.AttributeType.STRING,
+      },
+    });
+
+    return table;
+  }
+
+  private createSpa() {
+    return new SPADeploy(this, "cfDeploy").createSiteWithCloudfront({
+      indexDoc: "index.html",
+      websiteFolder: "../ui/dist",
     });
   }
 }

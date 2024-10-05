@@ -58,12 +58,18 @@ importers:
       npm-run-all2:
         specifier: ^6.2.0
         version: 6.2.3
+      typescript:
+        specifier: ^5.6.2
+        version: 5.6.2
 
   apps/infra:
     dependencies:
       aws-cdk-lib:
         specifier: 2.147.0
         version: 2.147.0(constructs@10.3.0)
+      cdk-spa-deploy:
+        specifier: 2.0.0-alpha.1
+        version: 2.0.0-alpha.1(aws-cdk-lib@2.147.0(constructs@10.3.0))(constructs@10.3.0)
       constructs:
         specifier: ^10.0.0
         version: 10.3.0
@@ -1706,6 +1712,12 @@ packages:
 
   caniuse-lite@1.0.30001664:
     resolution: {integrity: sha512-AmE7k4dXiNKQipgn7a2xg558IRqPN3jMQY/rOsbxDhrd0tyChwbITBfiwtnqz8bi2M5mIWbxAYBvk7W7QBUS2g==}
+
+  cdk-spa-deploy@2.0.0-alpha.1:
+    resolution: {integrity: sha512-eKepFms5nZ12nyJ1Ui2NONxTfhpwa2ozUWNf9tNYNkmDKqPTuMvKapoq9XO1B21iRQGLaqG1zrRldUREU3GpmA==}
+    peerDependencies:
+      aws-cdk-lib: ^2.2.0
+      constructs: ^10.0.13
 
   chalk@2.4.2:
     resolution: {integrity: sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==}
@@ -5004,6 +5016,11 @@ snapshots:
   camelcase@6.3.0: {}
 
   caniuse-lite@1.0.30001664: {}
+
+  cdk-spa-deploy@2.0.0-alpha.1(aws-cdk-lib@2.147.0(constructs@10.3.0))(constructs@10.3.0):
+    dependencies:
+      aws-cdk-lib: 2.147.0(constructs@10.3.0)
+      constructs: 10.3.0
 
   chalk@2.4.2:
     dependencies:
