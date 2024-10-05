@@ -1,29 +1,19 @@
 import { client } from "#common/infrastructure/clients/dynamodb.client";
-import { TaskStatus } from "#task/domain/task.entity";
 import { Entity, EntityItem } from "electrodb";
 
-export const TaskModel = new Entity(
+export const PasswordModel = new Entity(
   {
     model: {
-      entity: "task",
+      entity: "password",
       version: "1",
-      service: "task",
+      service: "user",
     },
     attributes: {
-      id: {
+      user_id: {
         type: "string",
         required: true,
       },
-      status: {
-        type: [
-          TaskStatus.TO_DO,
-          TaskStatus.IN_PROGRESS,
-          TaskStatus.DONE,
-        ] as const,
-        required: true,
-        default: "to_do",
-      },
-      name: {
+      hash: {
         type: "string",
         required: true,
       },
@@ -37,14 +27,14 @@ export const TaskModel = new Entity(
       },
     },
     indexes: {
-      task: {
+      user: {
         pk: {
           field: "pk",
-          composite: [],
+          composite: ["user_id"],
         },
         sk: {
           field: "sk",
-          composite: ["id"],
+          composite: [],
         },
       },
     },
@@ -55,4 +45,4 @@ export const TaskModel = new Entity(
   },
 );
 
-export type TaskModel = EntityItem<typeof TaskModel>;
+export type PasswordModel = EntityItem<typeof PasswordModel>;

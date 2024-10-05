@@ -1,5 +1,5 @@
 import { createApi } from "#utils/create-api";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { taskSchema } from "@task-bot/core/task/domain/task.entity";
 import {
   TaskMapper,
@@ -25,7 +25,9 @@ export const createTask = new OpenAPIHono().openapi(
         description: "Create",
         content: {
           "application/json": {
-            schema: taskResponseSchema,
+            schema: z.object({
+              data: taskResponseSchema,
+            }),
           },
         },
       },
@@ -41,7 +43,12 @@ export const createTask = new OpenAPIHono().openapi(
       const task = await new CreateTaskUseCase().execute({
         name,
       });
-      return c.json(TaskMapper.toResponse(task), 201);
+      return c.json(
+        {
+          data: TaskMapper.toResponse(task),
+        },
+        201,
+      );
     });
   },
 );

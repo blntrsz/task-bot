@@ -1,41 +1,66 @@
 import { z } from "zod";
-import { randomUUID } from "node:crypto";
-import { BaseEntity } from "#common/domain/base-entity";
-import { ValidationException } from "#common/domain/exception";
+import { BaseEntity, baseEntitySchema } from "#common/domain/base-entity";
+import {
+  TaskCreatedDomainEvent,
+  TaskNameUpdatedDomainEvent,
+  TaskStatusUpdatedDomainEvent,
+} from "./task.events";
+import { randomUUID } from "crypto";
 
-export const taskSchema = z.object({
-  id: z.string().uuid(),
-  name: z.string().min(6),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-});
+export enum TaskStatus {
+  TO_DO = "to_do",
+  IN_PROGRESS = "in_progress",
+  DONE = "done",
+}
+
+export const taskSchema = baseEntitySchema.merge(
+  z.object({
+    name: z.string().min(6),
+    status: z.nativeEnum(TaskStatus),
+  }),
+);
 
 export type TaskSchema = z.infer<typeof taskSchema>;
 
-export class TaskEntity extends BaseEntity {
-  data: TaskSchema;
+export class TaskEntity extends BaseEntity<typeof taskSchema> {
+  schema = taskSchema;
 
-  constructor(data: TaskSchema) {
-    super();
-    this.data = data;
-  }
-
-  validate() {
-    const parsedTask = taskSchema.safeParse(this.data);
-
-    if (!parsedTask.success) throw new ValidationException(parsedTask.error);
+  constructor(props: TaskSchema) {
+    super({
+      ...props,
+      props: props,
+    });
   }
 
   static create(data: Pick<TaskSchema, "name">) {
+    const now = new Date();
     const task = new TaskEntity({
       id: randomUUID(),
+      createdAt: now,
+      updatedAt: now,
       name: data.name,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      status: TaskStatus.TO_DO,
     });
 
     task.validate();
+    task.addEvent(new TaskCreatedDomainEvent(task));
 
     return task;
+  }
+
+  setStatus(status: TaskSchema["status"]) {
+    const oldStatus = this.getProps().status;
+    this.props.status = status;
+    this.updatedAt = new Date();
+    this.validate();
+    this.addEvent(new TaskStatusUpdatedDomainEvent(oldStatus, this));
+  }
+
+  setName(name: TaskSchema["name"]) {
+    const oldName = this.getProps().name;
+    this.props.name = name;
+    this.updatedAt = new Date();
+    this.validate();
+    this.addEvent(new TaskNameUpdatedDomainEvent(oldName, this));
   }
 }

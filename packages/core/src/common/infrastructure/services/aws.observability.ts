@@ -59,10 +59,7 @@ function createSegment(key: string, value: string) {
 }
 
 function setup(event: any, context: any) {
-  const { tracer, logger, metrics } = useObservability();
-  // tracer setup
-  tracer.annotateColdStart();
-  tracer.addServiceNameAnnotation();
+  const { logger, metrics } = useObservability();
 
   // logger setup
   logger.logEventIfEnabled(event);

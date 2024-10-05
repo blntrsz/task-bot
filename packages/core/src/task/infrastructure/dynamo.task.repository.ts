@@ -9,6 +9,21 @@ import { TaskMapper } from "./task.mapper";
 import { TaskModel } from "./task.model";
 
 export class DynamoTaskRepository implements TaskRepository {
+  private entities: TaskEntity[];
+  constructor() {
+    this.entities = [];
+  }
+
+  add(entity: TaskEntity) {
+    this.entities.push(entity);
+  }
+
+  popAll(): TaskEntity[] {
+    const copy = [...this.entities];
+    this.entities = [];
+    return copy;
+  }
+
   @Observe("repository")
   async findOne(id: string) {
     const task = await TaskModel.get({
@@ -17,12 +32,20 @@ export class DynamoTaskRepository implements TaskRepository {
 
     if (!task.data) throw new NotFoundException();
 
-    return TaskMapper.fromPersistence(task.data);
+    const taskEntity = TaskMapper.fromPersistence(task.data);
+
+    this.add(taskEntity);
+
+    return taskEntity;
   }
 
   @Observe("repository")
-  async createOne(task: TaskEntity) {
-    await TaskModel.create(TaskMapper.toPersistence(task)).go();
+  async save() {
+    await Promise.all(
+      this.entities.map((entity) => {
+        return TaskModel.upsert(TaskMapper.toPersistence(entity)).go();
+      }),
+    );
   }
 
   @Observe("repository")

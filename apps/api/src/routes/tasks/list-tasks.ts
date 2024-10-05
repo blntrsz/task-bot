@@ -1,7 +1,10 @@
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
-import { ListTasksUseCase } from "@task-bot/core/task/use-cases/list-tasks.use-case";
-import { TaskMapper } from "@task-bot/core/task/infrastructure/task.mapper";
+import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import {
+  TaskMapper,
+  taskResponseSchema,
+} from "@task-bot/core/task/infrastructure/task.mapper";
 import { createApi } from "#utils/create-api";
+import { useTaskRepository } from "@task-bot/core/task/domain/task.repository";
 
 export const listTasks = new OpenAPIHono().openapi(
   createRoute({
@@ -10,13 +13,20 @@ export const listTasks = new OpenAPIHono().openapi(
     responses: {
       200: {
         description: "List",
+        content: {
+          "application/json": {
+            schema: z.object({
+              data: z.array(taskResponseSchema),
+            }),
+          },
+        },
       },
     },
   }),
   async (c) =>
     createApi(c)(async () => {
-      const tasks = await new ListTasksUseCase().execute();
+      const tasks = await useTaskRepository().list();
 
-      return c.json(tasks.map((task) => TaskMapper.toResponse(task)));
+      return c.json({ data: tasks.map((task) => TaskMapper.toResponse(task)) });
     }),
 );

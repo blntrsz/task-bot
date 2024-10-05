@@ -1,8 +1,9 @@
 import { createContext } from "#common/context";
-import { DomainEvent } from "./domain-event";
+import { ZodTypeAny } from "zod";
+import { BaseEntity } from "../base-entity";
 
 export interface EventEmitter {
-  emit(event: DomainEvent[]): Promise<void>;
+  emit(entities: BaseEntity<ZodTypeAny>[]): Promise<void>;
 }
 
 export const EventEmitterContext = createContext<EventEmitter>();

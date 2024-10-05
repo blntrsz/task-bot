@@ -17,8 +17,6 @@
     "npm-run-all2": "^6.2.0"
   },
   "dependencies": {
-    "@aws-lambda-powertools/commons": "^2.8.0",
-    "@aws-lambda-powertools/logger": "^2.8.0",
     "@hono/node-server": "^1.13.1",
     "@hono/swagger-ui": "^0.4.1",
     "@hono/zod-openapi": "^0.16.2",

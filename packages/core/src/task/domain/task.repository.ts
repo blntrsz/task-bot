@@ -1,9 +1,12 @@
 import { createContext } from "#common/context";
-import { TaskEntity, TaskSchema } from "./task.entity";
+import { TaskEntity } from "./task.entity";
 
 export interface TaskRepository {
-  findOne(id: TaskSchema["id"]): Promise<TaskEntity>;
-  createOne(task: TaskEntity): Promise<void>;
+  add(entity: TaskEntity): void;
+  popAll(): TaskEntity[];
+
+  findOne(id: string): Promise<TaskEntity>;
+  save(): Promise<void>;
   list(): Promise<TaskEntity[]>;
 }
 

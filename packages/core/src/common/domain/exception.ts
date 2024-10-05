@@ -15,6 +15,7 @@ export class Exception extends Error {
 export const exceptionCodes = {
   validation: "exception.validation",
   notFound: "exception.not_found",
+  unauthorized: "exception.unauthorized",
 };
 
 export class ValidationException<T> extends Exception {
@@ -29,9 +30,16 @@ export class NotFoundException extends Exception {
   }
 }
 
+export class UnauthorizedException extends Exception {
+  constructor() {
+    super(exceptionCodes.unauthorized, "Unauthorized");
+  }
+}
+
 export const ExceptionCodeToStatus = {
   [exceptionCodes.validation]: 400,
   [exceptionCodes.notFound]: 404,
+  [exceptionCodes.unauthorized]: 401,
 };
 
 export function exceptionToResponse(exception: Exception) {

@@ -1,11 +1,17 @@
-import { DomainEvent } from "#common/domain/domain-event";
+import { BaseEntity } from "#common/domain/base-entity";
 import {
   EventEmitter,
   EventEmitterContext,
 } from "#common/domain/services/event-emitter";
+import { ZodTypeAny } from "zod";
 
-class EventBridgeEventEmitter implements EventEmitter {
-  async emit(events: DomainEvent[]) {
+export class EventBridgeEventEmitter implements EventEmitter {
+  async emit(entities: BaseEntity<ZodTypeAny>[]) {
+    const events = entities
+      .map((entity) => {
+        return entity.consumeEvents();
+      })
+      .flat();
     console.log(events);
   }
 }
