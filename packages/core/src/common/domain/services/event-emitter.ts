@@ -3,7 +3,7 @@ import { ZodTypeAny } from "zod";
 import { BaseEntity } from "../base-entity";
 
 export interface EventEmitter {
-  emit(entities: BaseEntity<ZodTypeAny>[]): Promise<void>;
+  emit(entities: readonly BaseEntity<ZodTypeAny>[]): Promise<void>;
 }
 
 export const EventEmitterContext = createContext<EventEmitter>();

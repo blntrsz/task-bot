@@ -4,47 +4,62 @@ import { TaskEntity, TaskSchema } from "./task.entity";
 
 export class TaskCreatedDomainEvent extends DomainEvent {
   constructor(task: TaskEntity) {
-    super(
-      "TaskCreated",
-      1,
-      {
+    super({
+      name: "TaskCreated",
+      version: 1,
+      data: {
         ...task.getProps(),
       },
-      {
+      metadata: {
         idempotencyKey: randomUUID(),
       },
-    );
+    });
   }
 }
 
 export class TaskStatusUpdatedDomainEvent extends DomainEvent {
   constructor(oldStatus: TaskSchema["status"], task: TaskEntity) {
-    super(
-      "TaskStatusUpdated",
-      1,
-      {
+    super({
+      name: "TaskStatusUpdated",
+      version: 1,
+      data: {
         ...task.getProps(),
         oldStatus,
       },
-      {
+      metadata: {
         idempotencyKey: randomUUID(),
       },
-    );
+    });
   }
 }
 
 export class TaskNameUpdatedDomainEvent extends DomainEvent {
   constructor(oldName: TaskSchema["name"], task: TaskEntity) {
-    super(
-      "TaskNameUpdated",
-      1,
-      {
+    super({
+      name: "TaskNameUpdated",
+      version: 1,
+      data: {
         ...task.getProps(),
         oldName,
       },
-      {
+      metadata: {
         idempotencyKey: randomUUID(),
       },
-    );
+    });
+  }
+}
+
+export class TaskDeletedDomainEvent extends DomainEvent {
+  constructor(task: TaskEntity) {
+    super({
+      name: "TaskDeleted",
+      version: 1,
+      data: {
+        ...task.getProps(),
+      },
+      metadata: {
+        idempotencyKey: randomUUID(),
+      },
+    });
   }
 }

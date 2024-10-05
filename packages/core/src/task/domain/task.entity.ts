@@ -3,6 +3,7 @@ import { BaseEntity, baseEntitySchema } from "#common/domain/base-entity";
 import {
   TaskCreatedDomainEvent,
   TaskNameUpdatedDomainEvent,
+  TaskDeletedDomainEvent,
   TaskStatusUpdatedDomainEvent,
 } from "./task.events";
 import { randomUUID } from "crypto";
@@ -62,5 +63,9 @@ export class TaskEntity extends BaseEntity<typeof taskSchema> {
     this.updatedAt = new Date();
     this.validate();
     this.addEvent(new TaskNameUpdatedDomainEvent(oldName, this));
+  }
+
+  delete() {
+    this.addEvent(new TaskDeletedDomainEvent(this));
   }
 }

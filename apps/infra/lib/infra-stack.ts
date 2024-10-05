@@ -18,6 +18,18 @@ export class InfraStack extends cdk.Stack {
         name: "sk",
         type: cdk.aws_dynamodb.AttributeType.STRING,
       },
+      timeToLiveAttribute: "expired_at",
+    });
+    table.addGlobalSecondaryIndex({
+      indexName: "gsi1pk-gsi1sk-index",
+      partitionKey: {
+        name: "gsi1pk",
+        type: cdk.aws_dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: "gsi1sk",
+        type: cdk.aws_dynamodb.AttributeType.STRING,
+      },
     });
 
     const fn = new NodejsFunction(this, "lambda", {

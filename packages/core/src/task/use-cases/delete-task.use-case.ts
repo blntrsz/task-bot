@@ -5,18 +5,10 @@ import { taskSchema } from "#task/domain/task.entity";
 import { useTaskRepository } from "#task/domain/task.repository";
 import { z } from "zod";
 
-const schema = taskSchema
-  .pick({ name: true, status: true })
-  .partial({})
-  .extend({
-    id: z.string(),
-  })
-  .refine((data) => data.status || data.name, {
-    message: "At least one property is needed for update",
-  });
+const schema = taskSchema.pick({ id: true });
 type Input = z.infer<typeof schema>;
 
-export class UpdateTaskUseCase {
+export class DeleteTaskUseCase {
   @Observe("use-case")
   @Validate(schema)
   async execute(input: Input) {
@@ -24,17 +16,9 @@ export class UpdateTaskUseCase {
     const eventEmitter = useEventEmitter();
 
     const task = await taskRepository.findOne(input.id);
-    taskRepository.add(task);
+    task.delete();
 
-    if (input.name) {
-      task.setName(input.name);
-    }
-
-    if (input.status) {
-      task.setName(input.status);
-    }
-
-    await taskRepository.save();
+    await taskRepository.remove(task);
     await eventEmitter.emit(taskRepository.popAll());
 
     return task;

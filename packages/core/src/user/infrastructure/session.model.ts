@@ -1,19 +1,23 @@
 import { client } from "#common/infrastructure/clients/dynamodb.client";
 import { Entity, EntityItem } from "electrodb";
 
-export const PasswordModel = new Entity(
+export const SessionModel = new Entity(
   {
     model: {
-      entity: "password",
+      entity: "session",
       version: "1",
       service: "user",
     },
     attributes: {
+      session: {
+        type: "string",
+        required: true,
+      },
       user_id: {
         type: "string",
         required: true,
       },
-      hash: {
+      expire_at: {
         type: "string",
         required: true,
       },
@@ -21,20 +25,16 @@ export const PasswordModel = new Entity(
         type: "string",
         required: true,
       },
-      updated_at: {
-        type: "string",
-        required: true,
-      },
     },
     indexes: {
-      password: {
+      session: {
         pk: {
           field: "pk",
           composite: ["user_id"],
         },
         sk: {
           field: "sk",
-          composite: [],
+          composite: ["session"],
         },
       },
     },
@@ -45,4 +45,4 @@ export const PasswordModel = new Entity(
   },
 );
 
-export type PasswordModel = EntityItem<typeof PasswordModel>;
+export type SessionModel = EntityItem<typeof SessionModel>;

@@ -30,11 +30,22 @@ export const UserModel = new Entity(
       user: {
         pk: {
           field: "pk",
-          composite: ["email"],
+          composite: ["id"],
         },
         sk: {
           field: "sk",
-          composite: ["id"],
+          composite: [],
+        },
+      },
+      byEmail: {
+        index: "gsi1pk-gsi1sk-index",
+        pk: {
+          field: "gsi1pk",
+          composite: ["email"],
+        },
+        sk: {
+          field: "gsi1sk",
+          composite: [],
         },
       },
     },

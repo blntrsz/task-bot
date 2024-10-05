@@ -4,7 +4,17 @@ export class DomainEvent {
   private data: object;
   private metadata?: object;
 
-  constructor(name: string, version: number, data: object, metadata?: object) {
+  constructor({
+    name,
+    version,
+    data,
+    metadata,
+  }: {
+    name: string;
+    version: number;
+    data: object;
+    metadata?: object;
+  }) {
     this.name = name;
     this.version = version;
     this.data = data;
