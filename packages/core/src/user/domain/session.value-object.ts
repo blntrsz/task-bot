@@ -1,14 +1,6 @@
 import { ValueObject } from "#common/domain/value-object";
-import { z } from "zod";
 import { randomUUID } from "crypto";
-
-export const sessionSchema = z.object({
-  session: z.string(),
-  expireAt: z.date(),
-  userId: z.string(),
-  createdAt: z.date(),
-});
-export type SessionSchema = z.infer<typeof sessionSchema>;
+import { SessionSchema } from "@task-bot/shared/session.types";
 
 function getExpirationDate() {
   const date = new Date();
@@ -17,8 +9,8 @@ function getExpirationDate() {
   return date;
 }
 
-export class Session extends ValueObject<typeof sessionSchema> {
-  schema = sessionSchema;
+export class Session extends ValueObject<typeof SessionSchema> {
+  schema = SessionSchema;
 
   static create(input: Pick<SessionSchema, "userId">) {
     const session = new Session({

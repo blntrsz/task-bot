@@ -1,17 +1,15 @@
 import { useEventEmitter } from "#common/domain/services/event-emitter";
 import { Observe } from "#common/domain/services/observability";
 import { Validate } from "#common/use-cases/validate";
-import { userSchema } from "#user/domain/user.entity";
 import { useUserRepository } from "#user/domain/user.repository";
+import { UserSchema } from "@task-bot/shared/user.types";
 import { z } from "zod";
 
-const schema = userSchema
-  .pick({
-    email: true,
-  })
-  .extend({
-    password: z.string(),
-  });
+const schema = UserSchema.pick({
+  email: true,
+}).extend({
+  password: z.string(),
+});
 type Input = z.infer<typeof schema>;
 
 export class LoginUserUseCase {

@@ -1,23 +1,16 @@
 import { ValueObject } from "#common/domain/value-object";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import { PasswordSchema } from "@task-bot/shared/password.types";
 
-export const passwordSchema = z.object({
-  userId: z.string(),
-  hash: z.string(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+export const createPasswordSchema = PasswordSchema.pick({
+  userId: true,
+}).extend({
+  password: z.string().min(8),
 });
-export type PasswordSchema = z.infer<typeof passwordSchema>;
 
-export const createPasswordSchema = passwordSchema
-  .pick({ userId: true })
-  .extend({
-    password: z.string().min(8),
-  });
-
-export class Password extends ValueObject<typeof passwordSchema> {
-  schema = passwordSchema;
+export class Password extends ValueObject<typeof PasswordSchema> {
+  schema = PasswordSchema;
 
   static create(data: z.infer<typeof createPasswordSchema>) {
     const now = new Date();

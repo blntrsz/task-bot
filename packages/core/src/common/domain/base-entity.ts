@@ -1,13 +1,7 @@
 import { z, ZodTypeAny } from "zod";
 import { DomainEvent } from "./domain-event";
 import { ValidationException } from "./exception";
-
-export const baseEntitySchema = z.object({
-  id: z.string(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-});
-export type BaseEntitySchema = z.infer<typeof baseEntitySchema>;
+import { BaseEntitySchema } from "@task-bot/shared/base.types";
 
 export interface CreateEntityProps<T> extends BaseEntitySchema {
   props: T;
@@ -61,7 +55,7 @@ export abstract class BaseEntity<TSchema extends ZodTypeAny> {
 
     if (!parsed.success) throw new ValidationException(parsed.error);
 
-    const baseParsed = baseEntitySchema.safeParse({
+    const baseParsed = BaseEntitySchema.safeParse({
       id: this.id,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,

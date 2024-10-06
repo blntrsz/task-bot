@@ -1,11 +1,11 @@
 import { useEventEmitter } from "#common/domain/services/event-emitter";
 import { Observe } from "#common/domain/services/observability";
 import { Validate } from "#common/use-cases/validate";
-import { taskSchema } from "#task/domain/task.entity";
 import { useTaskRepository } from "#task/domain/task.repository";
+import { TaskSchema } from "@task-bot/shared/task.types";
 import { z } from "zod";
 
-const schema = taskSchema.pick({ id: true });
+const schema = TaskSchema.pick({ id: true });
 type Input = z.infer<typeof schema>;
 
 export class DeleteTaskUseCase {

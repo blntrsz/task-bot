@@ -1,6 +1,5 @@
-import { z } from "zod";
 import { randomUUID } from "node:crypto";
-import { BaseEntity, baseEntitySchema } from "#common/domain/base-entity";
+import { BaseEntity } from "#common/domain/base-entity";
 import { Password } from "./password.value-object";
 import { UnauthorizedException } from "#common/domain/exception";
 import { Session } from "./session.value-object";
@@ -9,22 +8,15 @@ import {
   UserLoggedInDomainEvent,
   UserLoggedOutDomainEvent,
 } from "./user.events";
-
-export const userSchema = baseEntitySchema.merge(
-  z.object({
-    email: z.string().email(),
-  }),
-);
-
-export type UserSchema = z.infer<typeof userSchema>;
+import { UserSchema } from "@task-bot/shared/user.types";
 
 type UserValueObjects = {
   password: Password;
   session?: Session;
 };
 
-export class UserEntity extends BaseEntity<typeof userSchema> {
-  schema = userSchema;
+export class UserEntity extends BaseEntity<typeof UserSchema> {
+  schema = UserSchema;
   password: Password;
   session?: Session;
 

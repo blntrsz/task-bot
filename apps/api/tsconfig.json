@@ -8,8 +8,11 @@
     "types": [
       "node"
     ],
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx",
-    "experimentalDecorators": true
-  }
+    "jsxImportSource": "hono/jsx"
+  },
+  "exclude": ["node_modules", "../../node_modules"]
 }

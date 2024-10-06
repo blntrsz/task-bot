@@ -1,12 +1,11 @@
 import { useEventEmitter } from "#common/domain/services/event-emitter";
 import { Observe } from "#common/domain/services/observability";
 import { Validate } from "#common/use-cases/validate";
-import { taskSchema } from "#task/domain/task.entity";
 import { useTaskRepository } from "#task/domain/task.repository";
+import { TaskSchema } from "@task-bot/shared/task.types";
 import { z } from "zod";
 
-const schema = taskSchema
-  .pick({ name: true, status: true })
+const schema = TaskSchema.pick({ name: true, status: true })
   .partial({})
   .extend({
     id: z.string(),

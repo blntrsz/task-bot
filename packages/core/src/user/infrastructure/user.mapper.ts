@@ -1,22 +1,10 @@
-import { z } from "zod";
-import { baseEntitySchema } from "#common/domain/base-entity";
-import { UserEntity, userSchema } from "#user/domain/user.entity";
-import { Session, sessionSchema } from "#user/domain/session.value-object";
+import { UserEntity } from "#user/domain/user.entity";
+import { Session } from "#user/domain/session.value-object";
 import { UserModel } from "./user.model";
 import { PasswordModel } from "./password.model";
 import { SessionModel } from "./session.model";
 import { Password } from "#user/domain/password.value-object";
-
-export const userResponseSchema = z.object({
-  id: baseEntitySchema.shape.id,
-  type: z.literal("users"),
-  attributes: z.object({
-    email: userSchema.shape.email,
-    session: sessionSchema.shape.session.optional(),
-    created_at: z.string(),
-    updated_at: z.string(),
-  }),
-});
+import { UserResponseSchema } from "@task-bot/shared/user.types";
 
 export namespace UserMapper {
   export function toPersistence(user: UserEntity): {
@@ -83,9 +71,7 @@ export namespace UserMapper {
     );
   }
 
-  export function toResponse(
-    user: UserEntity,
-  ): z.infer<typeof userResponseSchema> {
+  export function toResponse(user: UserEntity): UserResponseSchema {
     const props = user.getProps();
     return {
       id: props.id,

@@ -1,6 +1,7 @@
 import { DomainEvent } from "#common/domain/domain-event";
 import { randomUUID } from "crypto";
-import { TaskEntity, TaskSchema } from "./task.entity";
+import { TaskEntity } from "./task.entity";
+import { TaskSchema } from "@task-bot/shared/task.types";
 
 export class TaskCreatedDomainEvent extends DomainEvent {
   constructor(task: TaskEntity) {

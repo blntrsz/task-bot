@@ -1,13 +1,14 @@
 import { BaseRepository } from "#common/domain/base-repository";
 import { NotFoundException } from "#common/domain/exception";
-import { SessionSchema } from "#user/domain/session.value-object";
-import { UserSchema, UserEntity } from "#user/domain/user.entity";
+import { UserEntity } from "#user/domain/user.entity";
 import { UserRepository } from "#user/domain/user.repository";
+import { UserSchema } from "@task-bot/shared/user.types";
 import { PasswordModel } from "./password.model";
 import { SessionModel } from "./session.model";
 import { UserMapper } from "./user.mapper";
 import { UserModel } from "./user.model";
 import { UserService } from "./user.service";
+import { SessionSchema } from "@task-bot/shared/session.types";
 
 export class DynamoUserRepository
   extends BaseRepository<UserEntity>

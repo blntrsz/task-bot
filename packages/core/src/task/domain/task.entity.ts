@@ -1,5 +1,4 @@
-import { z } from "zod";
-import { BaseEntity, baseEntitySchema } from "#common/domain/base-entity";
+import { BaseEntity } from "#common/domain/base-entity";
 import {
   TaskCreatedDomainEvent,
   TaskNameUpdatedDomainEvent,
@@ -7,24 +6,10 @@ import {
   TaskStatusUpdatedDomainEvent,
 } from "./task.events";
 import { randomUUID } from "crypto";
+import { TaskSchema, TaskStatus } from "@task-bot/shared/task.types";
 
-export enum TaskStatus {
-  TO_DO = "to_do",
-  IN_PROGRESS = "in_progress",
-  DONE = "done",
-}
-
-export const taskSchema = baseEntitySchema.merge(
-  z.object({
-    name: z.string().min(6),
-    status: z.nativeEnum(TaskStatus),
-  }),
-);
-
-export type TaskSchema = z.infer<typeof taskSchema>;
-
-export class TaskEntity extends BaseEntity<typeof taskSchema> {
-  schema = taskSchema;
+export class TaskEntity extends BaseEntity<typeof TaskSchema> {
+  schema = TaskSchema;
 
   constructor(props: TaskSchema) {
     super({

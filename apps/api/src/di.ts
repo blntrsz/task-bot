@@ -5,6 +5,8 @@ import { AwsObservability } from "@task-bot/core/common/infrastructure/services/
 import { DynamoTaskRepository } from "@task-bot/core/task/infrastructure/dynamo.task.repository";
 import { DynamoUserRepository } from "@task-bot/core/user/infrastructure/dynamo.user.repository";
 import { Container } from "@task-bot/core/common/domain/container";
+import { TASK_REPOSITORY_DI_TOKEN } from "@task-bot/core/task/domain/task.repository";
+import { USER_REPOSITORY_DI_TOKEN } from "@task-bot/core/user/domain/user.repository";
 
 export function createContainer() {
   const container = new Container();
@@ -13,8 +15,8 @@ export function createContainer() {
   container.addDependency(OBSERVABILITY_DI_TOKEN, AwsObservability);
 
   // repositories
-  container.addDependency(OBSERVABILITY_DI_TOKEN, DynamoTaskRepository);
-  container.addDependency(OBSERVABILITY_DI_TOKEN, DynamoUserRepository);
+  container.addDependency(TASK_REPOSITORY_DI_TOKEN, DynamoTaskRepository);
+  container.addDependency(USER_REPOSITORY_DI_TOKEN, DynamoUserRepository);
 
   return container;
 }

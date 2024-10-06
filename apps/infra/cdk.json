@@ -1,5 +1,5 @@
 {
-  "app": "npx tsx bin/infra.ts",
+  "app": "npx tsx --env-file=.env bin/infra.ts",
   "watch": {
     "include": [
       "**"

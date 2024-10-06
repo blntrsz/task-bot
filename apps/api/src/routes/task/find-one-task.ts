@@ -1,29 +1,22 @@
-import { createApi } from "#utils/create-api";
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { taskSchema } from "@task-bot/core/task/domain/task.entity";
+import { createApi } from "#lib/create-api";
+import { Response } from "#lib/types";
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { useTaskRepository } from "@task-bot/core/task/domain/task.repository";
-import {
-  TaskMapper,
-  taskResponseSchema,
-} from "@task-bot/core/task/infrastructure/task.mapper";
+import { TaskMapper } from "@task-bot/core/task/infrastructure/task.mapper";
+import { TaskResponseSchema, TaskSchema } from "@task-bot/shared/task.types";
 
 export const findOneTask = new OpenAPIHono().openapi(
   createRoute({
     path: "/tasks/{id}",
     method: "get",
+    tags: ["tasks"],
     request: {
-      params: taskSchema.pick({ id: true }),
+      params: TaskSchema.pick({ id: true }),
     },
     responses: {
       200: {
         description: "Find One",
-        content: {
-          "application/json": {
-            schema: z.object({
-              data: taskResponseSchema,
-            }),
-          },
-        },
+        content: Response(TaskResponseSchema),
       },
     },
   }),

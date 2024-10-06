@@ -1,18 +1,7 @@
-import { TaskEntity, taskSchema } from "#task/domain/task.entity";
+import { TaskEntity } from "#task/domain/task.entity";
 import { z } from "zod";
 import { TaskModel } from "./task.model";
-import { baseEntitySchema } from "#common/domain/base-entity";
-
-export const taskResponseSchema = z.object({
-  id: baseEntitySchema.shape.id,
-  type: z.literal("tasks"),
-  attributes: z.object({
-    name: taskSchema.shape.name,
-    status: taskSchema.shape.status,
-    created_at: z.string(),
-    updated_at: z.string(),
-  }),
-});
+import { TaskResponseSchema } from "@task-bot/shared/task.types";
 
 export namespace TaskMapper {
   export function toPersistence(task: TaskEntity): TaskModel {
@@ -38,7 +27,7 @@ export namespace TaskMapper {
 
   export function toResponse(
     task: TaskEntity,
-  ): z.infer<typeof taskResponseSchema> {
+  ): z.infer<typeof TaskResponseSchema> {
     const props = task.getProps();
     return {
       id: props.id,

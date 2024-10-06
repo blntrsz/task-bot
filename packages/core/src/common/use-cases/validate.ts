@@ -7,13 +7,13 @@ export function Validate(schema: ZodTypeAny) {
     _propertyKey: string,
     descriptor: PropertyDescriptor,
   ) {
-    const originalMethod = descriptor.value;
+    const originalMethod = descriptor?.value;
 
     descriptor.value = function (input: unknown) {
       const parsed = schema.safeParse(input);
       if (!parsed.success) throw new ValidationException(parsed.error);
 
-      return originalMethod.apply(this, input);
+      return originalMethod.apply(this, [parsed.data]);
     };
 
     return descriptor;

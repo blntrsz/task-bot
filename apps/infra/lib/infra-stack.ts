@@ -1,10 +1,11 @@
 import * as cdk from "aws-cdk-lib";
-import { LambdaIntegration, RestApi } from "aws-cdk-lib/aws-apigateway";
 import { Table } from "aws-cdk-lib/aws-dynamodb";
 import { Runtime, Tracing } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
 import { SPADeploy } from "cdk-spa-deploy";
+import { HttpApi } from "aws-cdk-lib/aws-apigatewayv2";
+import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 
 export class InfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -12,13 +13,13 @@ export class InfraStack extends cdk.Stack {
 
     const { fn, api } = this.createApi();
     const table = this.createTable();
-    this.createSpa();
+    // this.createSpa();
 
     fn.addEnvironment("TABLE_NAME", table.tableName);
     table.grantReadWriteData(fn);
 
     new cdk.CfnOutput(this, "api-url", {
-      value: api.url,
+      value: api.url ?? "",
     });
   }
 
@@ -32,6 +33,7 @@ export class InfraStack extends cdk.Stack {
       memorySize: 1024,
       environment: {
         NODE_OPTIONS: "--enable-source-maps",
+        DATABASE_URL: process.env.DATABASE_URL!,
       },
       bundling: {
         sourceMap: true,
@@ -49,24 +51,12 @@ export class InfraStack extends cdk.Stack {
       },
     });
 
-    const api = new RestApi(this, "api", {
-      deployOptions: {
-        tracingEnabled: true,
-        metricsEnabled: true,
-        dataTraceEnabled: true,
-      },
+    const api = new HttpApi(this, "api", {});
+
+    api.addRoutes({
+      path: "/{proxy+}",
+      integration: new HttpLambdaIntegration("api-fn", fn),
     });
-    const lambdaIntegration = new LambdaIntegration(fn);
-
-    api.root.addResource("ui").addMethod("GET", lambdaIntegration);
-    api.root.addResource("doc").addMethod("GET", lambdaIntegration);
-
-    const tasks = api.root.addResource("tasks");
-    tasks.addMethod("POST", lambdaIntegration);
-    tasks.addMethod("GET", lambdaIntegration);
-
-    const taskById = tasks.addResource("{proxy+}");
-    taskById.addMethod("GET", lambdaIntegration);
 
     return { fn, api };
   }

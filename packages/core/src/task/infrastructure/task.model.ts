@@ -1,5 +1,5 @@
 import { client } from "#common/infrastructure/clients/dynamodb.client";
-import { TaskStatus } from "#task/domain/task.entity";
+import { TaskStatus } from "@task-bot/shared/task.types";
 import { Entity, EntityItem } from "electrodb";
 
 export const TaskModel = new Entity(

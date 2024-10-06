@@ -1,12 +1,14 @@
 {
   "name": "@task-bot/api",
   "version": "1.0.0",
-  "type": "module",
   "imports": {
     "#*": "./src/*.ts"
   },
+  "exports": {
+    "./type": "./src/type.ts"
+  },
   "scripts": {
-    "dev": "tsx src/dev.ts",
+    "dev": "tsc ./src/dev.ts && node ./dist/index.js",
     "typecheck": "tsc --noEmit",
     "build": "esbuild --bundle --outfile=./dist/index.js --platform=node --target=node20 ./src/index.ts",
     "zip": "zip -j lambda.zip dist/index.js",
@@ -14,16 +16,18 @@
     "deploy": "run-s build zip update"
   },
   "devDependencies": {
-    "esbuild": "^0.21.4",
-    "npm-run-all2": "^6.2.0",
+    "esbuild": "^0.24.0",
+    "npm-run-all2": "^6.2.3",
     "typescript": "^5.6.2"
   },
   "dependencies": {
+    "@task-bot/shared": "workspace:*",
     "@hono/node-server": "^1.13.1",
-    "@hono/swagger-ui": "^0.4.1",
-    "@hono/zod-openapi": "^0.16.2",
+    "@hono/zod-openapi": "^0.16.3",
+    "@scalar/hono-api-reference": "^0.5.150",
     "@task-bot/core": "workspace:*",
     "hono": "^4.6.3",
+    "ts-node": "^10.9.2",
     "tsx": "^4.19.1"
   }
 }

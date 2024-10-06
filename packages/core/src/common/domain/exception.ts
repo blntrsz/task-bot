@@ -16,6 +16,7 @@ export const exceptionCodes = {
   validation: "exception.validation",
   notFound: "exception.not_found",
   unauthorized: "exception.unauthorized",
+  exists: "exception.exists",
 };
 
 export class ValidationException<T> extends Exception {
@@ -33,6 +34,12 @@ export class NotFoundException extends Exception {
 export class UnauthorizedException extends Exception {
   constructor() {
     super(exceptionCodes.unauthorized, "Unauthorized");
+  }
+}
+
+export class AlreadyExistException extends Exception {
+  constructor() {
+    super(exceptionCodes.exists, "Entity already exists.");
   }
 }
 
