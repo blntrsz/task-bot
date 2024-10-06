@@ -1,12 +1,13 @@
 import { Notifications } from "../features/notification/components/notification";
 import { Link, Outlet, createRootRoute } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 export const Route = createRootRoute({
-  component: RootComponent,
+  component,
 });
 
-function RootComponent() {
+function component() {
   return (
     <>
       <div className="p-2 flex gap-2 text-lg">
@@ -30,7 +31,8 @@ function RootComponent() {
       </div>
       <hr />
       <Outlet />
-      <TanStackRouterDevtools position="bottom-right" />
+      <TanStackRouterDevtools />
+      <ReactQueryDevtools />
       <Notifications />
     </>
   );
