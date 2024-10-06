@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { nanoid } from "nanoid";
 import { create } from "zustand";
 
 export type Notification = {
@@ -19,8 +19,8 @@ export const useNotifications = create<NotificationsStore>((set) => ({
   addNotification: (notification) =>
     set((state) => ({
       notifications: [
+        { id: nanoid(), ...notification },
         ...state.notifications,
-        { id: randomUUID(), ...notification },
       ],
     })),
   dismissNotification: (id) =>

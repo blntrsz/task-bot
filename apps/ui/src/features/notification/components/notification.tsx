@@ -1,26 +1,35 @@
 import { useNotifications } from "../store/notification.store";
-import { Snackbar } from "@mui/joy";
+import { Button, Snackbar } from "@mui/joy";
 
 export const Notifications = () => {
-  const { dismissNotification } = useNotifications();
-  const notification = useNotifications(({ notifications }) =>
-    notifications.at(0),
-  );
+  const { notifications, dismissNotification } = useNotifications();
+  const notification = notifications.at(0);
 
   if (!notification) return null;
 
   return (
-    <div
-      aria-live="assertive"
-      className="pointer-events-none fixed inset-0 z-50 flex flex-col items-end space-y-4 px-4 py-6 sm:items-start sm:p-6"
+    <Snackbar
+      key={notification.id}
+      onClose={() => dismissNotification(notification.id)}
+      onUnmount={() => dismissNotification(notification.id)}
+      autoHideDuration={5_000}
+      open
+      color={notification.type}
+      anchorOrigin={{
+        vertical: "bottom",
+        horizontal: "left",
+      }}
+      endDecorator={
+        <Button
+          variant="outlined"
+          onClick={() => dismissNotification(notification.id)}
+          size="sm"
+        >
+          Dismiss
+        </Button>
+      }
     >
-      <Snackbar
-        key={notification.id}
-        onUnmount={() => dismissNotification(notification.id)}
-        autoHideDuration={5_000}
-        open
-        color={notification.type}
-      />
-    </div>
+      {notification.title}
+    </Snackbar>
   );
 };

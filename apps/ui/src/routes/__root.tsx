@@ -1,3 +1,4 @@
+import { Notifications } from "../features/notification/components/notification";
 import { Link, Outlet, createRootRoute } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 
@@ -30,6 +31,7 @@ function RootComponent() {
       <hr />
       <Outlet />
       <TanStackRouterDevtools position="bottom-right" />
+      <Notifications />
     </>
   );
 }
