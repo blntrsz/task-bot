@@ -26,13 +26,13 @@ export class PostgresTaskRepository
       "repository",
       `${this.tableName}.${this.save.name}`,
     );
-    await segment.try(async () => {
-      await Promise.all(
+    await segment.try(() =>
+      Promise.all(
         this.entities.map(({ entity, operation }) => {
           return this.saveOne(entity, operation);
         }),
-      );
-    });
+      ),
+    );
   }
 
   async findOne(props: Pick<TaskEntitySchema, "id">): Promise<TaskEntity> {
@@ -40,7 +40,7 @@ export class PostgresTaskRepository
       "repository",
       `${this.tableName}.${this.findOne.name}`,
     );
-    return segment.try(async () => {
+    return await segment.try(async () => {
       const conn = await this.db().get();
       const result = await conn.one(
         sql.type(
@@ -56,7 +56,7 @@ export class PostgresTaskRepository
       "repository",
       `${this.tableName}.${this.list.name}`,
     );
-    return segment.try(async () => {
+    return await segment.try(async () => {
       const conn = await this.db().get();
       const tasks = await conn.many(
         sql.type(TaskRepositoryQuerySchema)`

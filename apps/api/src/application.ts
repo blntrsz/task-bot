@@ -33,10 +33,8 @@ app.use(async (c, next) => {
 });
 
 app.onError(async (error, c) => {
-  // const { tracer, logger } = useObservability();
   const tracer = TracerContext.use();
   const logger = LoggerContext.use();
-  const rootTraceId = tracer.getRootXrayTraceId();
 
   if ("getResponse" in error) {
     const response = error.getResponse();
@@ -60,7 +58,7 @@ app.onError(async (error, c) => {
     {
       errors: [
         {
-          id: rootTraceId,
+          id: tracer.getRootXrayTraceId(),
           message: error.message,
         },
       ],

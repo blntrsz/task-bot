@@ -33,15 +33,16 @@ export function addSegment(key: string, value: string) {
     logger,
     tracer,
     metrics,
-    try<T>(cb: () => Promise<T>) {
+    async try<T>(cb: () => Promise<T>) {
       try {
-        return cb();
+        return await cb();
       } catch (error) {
         if (error instanceof Exception) {
           throw error;
         }
 
         tracer.addErrorAsMetadata(error as Error);
+        logger.error(error as any);
 
         throw new InternalServerException(error as any);
       }

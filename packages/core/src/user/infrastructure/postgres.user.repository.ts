@@ -39,7 +39,7 @@ export class PostgresUserRepository
       "repository",
       `${this.tableName}.${this.findOne.name}`,
     );
-    return segment.try(async () => {
+    return await segment.try(async () => {
       const conn = await this.db().get();
       const result = await conn.one(
         sql.type(
