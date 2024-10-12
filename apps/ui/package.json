@@ -30,7 +30,6 @@
     "@tanstack/react-query-devtools": "^5.59.0",
     "@tanstack/react-router": "^1.62.1",
     "@tanstack/router-devtools": "^1.62.1",
-    "@task-bot/shared": "workspace:*",
     "nanoid": "^5.0.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

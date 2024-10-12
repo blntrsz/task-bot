@@ -1,18 +1,13 @@
 {
+  "extends": "@tsconfig/node20/tsconfig.json",
   "compilerOptions": {
-    "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "strict": true,
-    "skipLibCheck": true,
-    "types": [
-      "node"
-    ],
-    "outDir": "./dist",
-    "esModuleInterop": true,
     "experimentalDecorators": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx"
+    "emitDecoratorMetadata": true,
+    "baseUrl" : ".",
+    "paths": {
+      "@task-bot/core/*": ["../../packages/core/src/*"],
+    }
   },
-  "exclude": ["node_modules", "../../node_modules"]
 }

@@ -1,33 +1,33 @@
-import { useEventEmitter } from "#common/domain/services/event-emitter";
-import { Observe } from "#common/domain/services/observability";
-import { Validate } from "#common/use-cases/validate";
-import { useUserRepository } from "#user/domain/user.repository";
-import { SessionSchema } from "@task-bot/shared/session.types";
-import { UserSchema } from "@task-bot/shared/user.types";
+import { EventEmitter } from "@task-bot/core/shared/domain/event-emitter";
+import { Observe } from "@task-bot/core/shared/domain/observability";
+import { UnitOfWork } from "@task-bot/core/shared/domain/unit-of-work";
+import { Validate } from "@task-bot/core/shared/use-cases/validate";
+import { UserEntitySchema } from "@task-bot/core/user/domain/user.entity";
+import { UserRepository } from "@task-bot/core/user/domain/user.repository";
 import { z } from "zod";
 
-const schema = UserSchema.pick({
+const Input = UserEntitySchema.pick({
   id: true,
-}).merge(
-  SessionSchema.pick({
-    session: true,
-  }),
-);
-type Input = z.infer<typeof schema>;
+});
+type Input = z.infer<typeof Input>;
 
 export class DeleteUserUseCase {
+  constructor(
+    private readonly userRepository = UserRepository.use(),
+    private readonly unitOfWork = UnitOfWork.use(),
+    private readonly eventEmitter = EventEmitter.use(),
+  ) {}
+
   @Observe("use-case")
-  @Validate(schema)
+  @Validate(Input)
   async execute(input: Input) {
-    const eventEmitter = useEventEmitter();
-    const userRepository = useUserRepository();
+    const user = await this.userRepository.findOne(input);
 
-    const user = await userRepository.findOne(input.id, input.session);
+    // TODO
+    // this.eventEmitter.add(UserCreatedDomainEvent.create(user));
+    this.userRepository.add(user, "delete");
 
-    user.assertLoggedIn();
-
-    await userRepository.remove(user);
-    await eventEmitter.emit(userRepository.popAll());
+    await this.unitOfWork.save([this.userRepository], this.eventEmitter);
 
     return user;
   }

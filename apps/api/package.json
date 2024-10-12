@@ -1,14 +1,9 @@
 {
   "name": "@task-bot/api",
   "version": "1.0.0",
-  "imports": {
-    "#*": "./src/*.ts"
-  },
-  "exports": {
-    "./type": "./src/type.ts"
-  },
+  "type": "module",
   "scripts": {
-    "dev": "tsc ./src/dev.ts && node ./dist/index.js",
+    "dev": "ts-node --esm ./src/dev.ts",
     "typecheck": "tsc --noEmit",
     "build": "esbuild --bundle --outfile=./dist/index.js --platform=node --target=node20 ./src/index.ts",
     "zip": "zip -j lambda.zip dist/index.js",
@@ -21,12 +16,13 @@
     "typescript": "^5.6.2"
   },
   "dependencies": {
-    "@task-bot/shared": "workspace:*",
+    "@task-bot/core": "workspace:*",
     "@hono/node-server": "^1.13.1",
     "@hono/zod-openapi": "^0.16.3",
     "@scalar/hono-api-reference": "^0.5.150",
-    "@task-bot/core": "workspace:*",
+    "@tsconfig/node20": "^20.1.4",
     "hono": "^4.6.3",
+    "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.1"
   }

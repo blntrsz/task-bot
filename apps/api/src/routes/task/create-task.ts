@@ -1,12 +1,9 @@
-import { createApi } from "#lib/create-api";
-import { Response } from "#lib/types";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
-import { TaskMapper } from "@task-bot/core/task/infrastructure/task.mapper";
-import { CreateTaskUseCase } from "@task-bot/core/task/use-cases/create-task.use-case";
-import {
-  CreateTaskSchema,
-  TaskResponseSchema,
-} from "@task-bot/shared/task.types";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { Response } from "../../lib/types";
+import { CreateTaskUseCase } from "@task-bot/core/task/use-case/create-task.use-case";
+import { CreateTaskSchema, TaskResponseSchema } from "../../types/task.types";
+
+const ResponseSchema = TaskResponseSchema;
 
 export const createTask = new OpenAPIHono().openapi(
   createRoute({
@@ -25,25 +22,25 @@ export const createTask = new OpenAPIHono().openapi(
     responses: {
       201: {
         description: "Create",
-        content: Response(TaskResponseSchema),
+        content: Response(ResponseSchema),
       },
     },
   }),
   async (c) => {
-    return createApi(c)(async () => {
-      const {
-        attributes: { name },
-      } = c.req.valid("json");
+    const {
+      attributes: { title },
+    } = c.req.valid("json");
 
-      const task = await new CreateTaskUseCase().execute({
-        name,
-      });
-      return c.json(
-        {
-          data: TaskMapper.toResponse(task),
-        },
-        201,
-      );
+    const task = await new CreateTaskUseCase().execute({
+      title,
+      description: "",
     });
+
+    return c.json(
+      {
+        data: ResponseSchema.parse(task.toResponse()),
+      },
+      201,
+    );
   },
 );

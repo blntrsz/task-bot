@@ -1,56 +1,63 @@
-import { BaseEntity } from "#common/domain/base-entity";
-import {
-  TaskCreatedDomainEvent,
-  TaskNameUpdatedDomainEvent,
-  TaskDeletedDomainEvent,
-  TaskStatusUpdatedDomainEvent,
-} from "./task.events";
+import { BaseEntity } from "@task-bot/core/shared/domain/base-entity";
 import { randomUUID } from "crypto";
-import { TaskSchema, TaskStatus } from "@task-bot/shared/task.types";
+import { z } from "zod";
 
-export class TaskEntity extends BaseEntity<typeof TaskSchema> {
-  schema = TaskSchema;
+export enum TaskStatus {
+  TO_DO = "to_do",
+  IN_PROGRESS = "in_progress",
+  DONE = "done",
+}
 
-  constructor(props: TaskSchema) {
-    super({
-      ...props,
-      props: props,
-    });
+export const TaskEntitySchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  status: z.nativeEnum(TaskStatus),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+});
+export type TaskEntitySchema = z.infer<typeof TaskEntitySchema>;
+
+export class TaskEntity extends BaseEntity<typeof TaskEntitySchema> {
+  previous?: TaskEntity;
+
+  fork(toUpdate: Partial<TaskEntitySchema>) {
+    const entity = new TaskEntity(
+      {
+        ...structuredClone(this.props),
+        ...toUpdate,
+        updatedAt: new Date(),
+      },
+      toUpdate,
+    );
+    entity.previous = this;
+
+    return entity;
   }
 
-  static create(data: Pick<TaskSchema, "name">) {
+  static create(props: Pick<TaskEntitySchema, "title" | "description">) {
     const now = new Date();
-    const task = new TaskEntity({
+    return new TaskEntity({
       id: randomUUID(),
+      title: props.title,
+      description: props.description,
+      status: TaskStatus.TO_DO,
       createdAt: now,
       updatedAt: now,
-      name: data.name,
-      status: TaskStatus.TO_DO,
     });
-
-    task.validate();
-    task.addEvent(new TaskCreatedDomainEvent(task));
-
-    return task;
   }
 
-  setStatus(status: TaskSchema["status"]) {
-    const oldStatus = this.getProps().status;
-    this.props.status = status;
-    this.updatedAt = new Date();
-    this.validate();
-    this.addEvent(new TaskStatusUpdatedDomainEvent(oldStatus, this));
-  }
-
-  setName(name: TaskSchema["name"]) {
-    const oldName = this.getProps().name;
-    this.props.name = name;
-    this.updatedAt = new Date();
-    this.validate();
-    this.addEvent(new TaskNameUpdatedDomainEvent(oldName, this));
-  }
-
-  delete() {
-    this.addEvent(new TaskDeletedDomainEvent(this));
+  toResponse() {
+    const props = this.props;
+    return {
+      id: props.id,
+      type: "tasks" as const,
+      attributes: {
+        title: props.title,
+        status: props.status,
+        created_at: props.createdAt.toISOString(),
+        updated_at: props.updatedAt.toISOString(),
+      },
+    };
   }
 }

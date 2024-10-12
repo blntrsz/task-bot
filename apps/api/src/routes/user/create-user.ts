@@ -1,12 +1,7 @@
-import { createApi } from "#lib/create-api";
-import { Response } from "#lib/types";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
-import { UserMapper } from "@task-bot/core/user/infrastructure/user.mapper";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { CreateUserSchema, UserResponseSchema } from "../../types/user.types";
 import { CreateUserUseCase } from "@task-bot/core/user/use-cases/create-user.use-case";
-import {
-  CreateUserSchema,
-  UserResponseSchema,
-} from "@task-bot/shared/user.types";
+import { Response } from "../../lib/types";
 
 export const createUser = new OpenAPIHono().openapi(
   createRoute({
@@ -30,21 +25,19 @@ export const createUser = new OpenAPIHono().openapi(
     },
   }),
   async (c) => {
-    return createApi(c)(async () => {
-      const {
-        attributes: { email, password },
-      } = c.req.valid("json");
+    const {
+      attributes: { email, password },
+    } = c.req.valid("json");
 
-      const user = await new CreateUserUseCase().execute({
-        email,
-        password,
-      });
-      return c.json(
-        {
-          data: UserMapper.toResponse(user),
-        },
-        201,
-      );
+    const user = await new CreateUserUseCase().execute({
+      email,
+      password,
     });
+    return c.json(
+      {
+        data: UserResponseSchema.parse(user.toResponse()),
+      },
+      201,
+    );
   },
 );

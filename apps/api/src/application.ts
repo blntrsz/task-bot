@@ -1,18 +1,14 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { StatusCode } from "hono/utils/http-status";
-import {
-  Exception,
-  exceptionToResponse,
-} from "@task-bot/core/common/domain/exception";
 import { listTasks } from "./routes/task/list-tasks";
 import { createTask } from "./routes/task/create-task";
 import { findOneTask } from "./routes/task/find-one-task";
-import { useObservability } from "@task-bot/core/common/domain/services/observability";
 import { apiReference } from "@scalar/hono-api-reference";
 import { deleteTask } from "./routes/task/delete-task";
 import { createUser } from "./routes/user/create-user";
-import { getCookie } from "hono/cookie";
-import { VerifyUserSessionUseCase } from "@task-bot/core/user/use-cases/verify-user-session.use-case";
+import {
+  LoggerContext,
+  TracerContext,
+} from "@task-bot/core/shared/domain/observability";
 
 export const app = new OpenAPIHono();
 
@@ -24,19 +20,21 @@ app.use(async (c, next) => {
   if (isCreateUserPath || isOpenApiPath || isScalarPath) {
     return next();
   }
-  const session = getCookie(c, "_session") ?? "";
-  const userId = getCookie(c, "_userid") ?? "";
-
-  await new VerifyUserSessionUseCase().execute({
-    session,
-    id: userId,
-  });
+  // const session = getCookie(c, "_session") ?? "";
+  // const userId = getCookie(c, "_userid") ?? "";
+  //
+  // await new VerifyUserSessionUseCase().execute({
+  //   session,
+  //   id: userId,
+  // });
 
   return next();
 });
 
 app.onError(async (error, c) => {
-  const { tracer, logger } = useObservability();
+  // const { tracer, logger } = useObservability();
+  const tracer = TracerContext.use();
+  const logger = LoggerContext.use();
   const rootTraceId = tracer.getRootXrayTraceId();
 
   if ("getResponse" in error) {
@@ -46,16 +44,16 @@ app.onError(async (error, c) => {
     return response;
   }
 
-  // @ts-expect-error -- traced does not exist on error
+  // @ts-expect-error -- no traced type
   if (!error.traced) {
     tracer.addErrorAsMetadata(error);
     logger.error(error.message);
   }
 
-  if (error instanceof Exception) {
-    const { json, status } = exceptionToResponse(error);
-    return c.json(json, status as StatusCode);
-  }
+  // if (error instanceof Exception) {
+  //   const { json, status } = exceptionToResponse(error);
+  //   return c.json(json, status as StatusCode);
+  // }
 
   return c.json(
     {

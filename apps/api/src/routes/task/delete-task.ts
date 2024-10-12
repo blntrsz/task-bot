@@ -1,9 +1,9 @@
-import { createApi } from "#lib/create-api";
-import { Response } from "#lib/types";
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { TaskMapper } from "@task-bot/core/task/infrastructure/task.mapper";
-import { DeleteTaskUseCase } from "@task-bot/core/task/use-cases/delete-task.use-case";
-import { TaskResponseSchema } from "@task-bot/shared/task.types";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
+import { Response } from "../../lib/types";
+import { DeleteTaskUseCase } from "@task-bot/core/task/use-case/delete-task.use-case";
+import { TaskResponseSchema } from "../../types/task.types";
+
+const ResponseSchema = TaskResponseSchema.pick({ id: true, type: true });
 
 export const deleteTask = new OpenAPIHono().openapi(
   createRoute({
@@ -18,27 +18,21 @@ export const deleteTask = new OpenAPIHono().openapi(
     responses: {
       200: {
         description: "Delete",
-        content: Response(TaskResponseSchema.pick({ id: true, type: true })),
+        content: Response(ResponseSchema),
       },
     },
   }),
   async (c) => {
-    return createApi(c)(async () => {
-      const { id } = c.req.valid("param");
+    const { id } = c.req.valid("param");
 
-      const task = await new DeleteTaskUseCase().execute({
-        id,
-      });
-      const response = TaskMapper.toResponse(task);
-      return c.json(
-        {
-          data: {
-            id: response.id,
-            type: response.type,
-          },
-        },
-        200,
-      );
+    const task = await new DeleteTaskUseCase().execute({
+      id,
     });
+    return c.json(
+      {
+        data: ResponseSchema.parse(task.toResponse()),
+      },
+      200,
+    );
   },
 );

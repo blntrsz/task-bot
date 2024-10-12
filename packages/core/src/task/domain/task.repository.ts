@@ -1,14 +1,27 @@
-import { BaseRepository } from "#common/domain/base-repository";
-import { useContainer } from "#common/domain/container";
-import { TaskEntity } from "./task.entity";
+import { z } from "zod";
+import { TaskEntity, TaskEntitySchema } from "./task.entity";
+import { BaseRepository } from "@task-bot/core/shared/domain/base-repository";
+import { objectToCamelCase } from "@task-bot/core/shared/infrastructure/util";
+import { createContext } from "@task-bot/core/shared/contex";
 
-export const TASK_REPOSITORY_DI_TOKEN = "task-repository-di-token";
+export type PaginatedOptions = {
+  pageNumber: number;
+  pageSize: number;
+};
+
+export type Paginated<T> = {
+  data: T[];
+  hasNextPage: boolean;
+} & PaginatedOptions;
+
 export interface TaskRepository extends BaseRepository<TaskEntity> {
-  findOne(id: string): Promise<TaskEntity>;
-  save(): Promise<void>;
-  list(): Promise<TaskEntity[]>;
-  remove(task: TaskEntity): Promise<void>;
+  findOne(props: Pick<TaskEntitySchema, "id">): Promise<TaskEntity>;
+  list(options: PaginatedOptions): Promise<Paginated<TaskEntity>>;
 }
 
-export const useTaskRepository = () =>
-  useContainer<TaskRepository>(TASK_REPOSITORY_DI_TOKEN);
+export const TaskRepository = createContext<TaskRepository>();
+
+export const TaskRepositoryQuerySchema = z.preprocess(
+  objectToCamelCase,
+  TaskEntitySchema,
+);

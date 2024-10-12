@@ -1,15 +1,19 @@
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { TaskMapper } from "@task-bot/core/task/infrastructure/task.mapper";
-import { useTaskRepository } from "@task-bot/core/task/domain/task.repository";
-import { Response } from "#lib/types";
-import { TaskResponseSchema } from "@task-bot/shared/task.types";
-import { createApi } from "#lib/create-api";
+import { Response } from "../../lib/types";
+import { TaskRepository } from "@task-bot/core/task/domain/task.repository";
+import { TaskResponseSchema } from "../../types/task.types";
 
 export const listTasks = new OpenAPIHono().openapi(
   createRoute({
     path: "/tasks",
     method: "get",
     tags: ["tasks"],
+    request: {
+      query: z.object({
+        "page[number]": z.number().min(1).default(1),
+        "page[size]": z.number().min(1).default(10),
+      }),
+    },
     responses: {
       200: {
         description: "List",
@@ -17,10 +21,36 @@ export const listTasks = new OpenAPIHono().openapi(
       },
     },
   }),
-  async (c) =>
-    createApi(c)(async () => {
-      const tasks = await useTaskRepository().list();
+  async (c) => {
+    const query = c.req.valid("query");
+    const tasks = await (TaskRepository.use() as TaskRepository).list({
+      pageNumber: query["page[number]"],
+      pageSize: query["page[size]"],
+    });
 
-      return c.json({ data: tasks.map((task) => TaskMapper.toResponse(task)) });
-    }),
+    const previousLinkQueryParam = new URLSearchParams();
+    previousLinkQueryParam.set(
+      "page[number]",
+      String(query["page[number]"] - 1),
+    );
+    previousLinkQueryParam.set("page[size]", String(query["page[size]"]));
+    const nextLinkQueryParam = new URLSearchParams();
+    nextLinkQueryParam.set("page[number]", String(query["page[number]"] + 1));
+    nextLinkQueryParam.set("page[size]", String(query["page[size]"]));
+
+    return c.json({
+      data: tasks.data.map((task) =>
+        TaskResponseSchema.parse(task.toResponse()),
+      ),
+      links: {
+        prev:
+          tasks.pageNumber === 1
+            ? null
+            : `/tasks?${previousLinkQueryParam.toString()}`,
+        next: tasks.hasNextPage
+          ? `/tasks${nextLinkQueryParam.toString()}`
+          : null,
+      },
+    });
+  },
 );

@@ -1,9 +1,9 @@
-import { createApi } from "#lib/create-api";
-import { Response } from "#lib/types";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
-import { useTaskRepository } from "@task-bot/core/task/domain/task.repository";
-import { TaskMapper } from "@task-bot/core/task/infrastructure/task.mapper";
-import { TaskResponseSchema, TaskSchema } from "@task-bot/shared/task.types";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { Response } from "../../lib/types";
+import { TaskRepository } from "@task-bot/core/task/domain/task.repository";
+import { TaskResponseSchema, TaskSchema } from "../../types/task.types";
+
+const ResponseSchema = TaskResponseSchema;
 
 export const findOneTask = new OpenAPIHono().openapi(
   createRoute({
@@ -16,21 +16,19 @@ export const findOneTask = new OpenAPIHono().openapi(
     responses: {
       200: {
         description: "Find One",
-        content: Response(TaskResponseSchema),
+        content: Response(ResponseSchema),
       },
     },
   }),
   async (c) => {
-    return createApi(c)(async () => {
-      const { id } = c.req.valid("param");
-      const task = await useTaskRepository().findOne(id);
+    const param = c.req.valid("param");
+    const task = await (TaskRepository.use() as TaskRepository).findOne(param);
 
-      return c.json(
-        {
-          data: TaskMapper.toResponse(task),
-        },
-        200,
-      );
-    });
+    return c.json(
+      {
+        data: ResponseSchema.parse(task.toResponse()),
+      },
+      200,
+    );
   },
 );

@@ -1,35 +1,25 @@
-import { ValueObject } from "#common/domain/value-object";
+import { BaseValueObject } from "@task-bot/core/shared/domain/base-value-object";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
-import { PasswordSchema } from "@task-bot/shared/password.types";
 
-export const createPasswordSchema = PasswordSchema.pick({
-  userId: true,
-}).extend({
+export const PasswordSchema = z.object({
   password: z.string().min(8),
 });
 
-export class Password extends ValueObject<typeof PasswordSchema> {
-  schema = PasswordSchema;
+export const PasswordValueObjectSchema = z.object({
+  passwordHash: z.string(),
+});
 
-  static create(data: z.infer<typeof createPasswordSchema>) {
-    const now = new Date();
-    const password = new Password({
-      hash: bcrypt.hashSync(data.password, 10),
-      userId: data.userId,
-      createdAt: now,
-      updatedAt: now,
+export class PasswordValueObject extends BaseValueObject<
+  typeof PasswordValueObjectSchema
+> {
+  static create(props: z.infer<typeof PasswordSchema>) {
+    return new PasswordValueObject({
+      passwordHash: bcrypt.hashSync(props.password, 10),
     });
-
-    password.validate();
-
-    return password;
   }
 
-  isEqual(password: Password): boolean {
-    return (
-      password.props.userId === this.props.userId &&
-      password.props.hash === this.props.hash
-    );
+  equals(password: PasswordValueObject) {
+    return this.props.passwordHash === password.props.passwordHash;
   }
 }
