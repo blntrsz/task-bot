@@ -1,9 +1,12 @@
 import { EventEmitter } from "@task-bot/core/shared/domain/event-emitter";
-import { Observe } from "@task-bot/core/shared/domain/observability";
+import { addSegment } from "@task-bot/core/shared/domain/observability";
 import { UnitOfWork } from "@task-bot/core/shared/domain/unit-of-work";
-import { Validate } from "@task-bot/core/shared/use-cases/validate";
+import { Guard } from "@task-bot/core/shared/use-cases/guard";
 import { TaskCreatedDomainEvent } from "@task-bot/core/task/domain/events/task-created.event";
-import { TaskEntity, TaskEntitySchema } from "@task-bot/core/task/domain/task.entity";
+import {
+  TaskEntity,
+  TaskEntitySchema,
+} from "@task-bot/core/task/domain/task.entity";
 import { TaskRepository } from "@task-bot/core/task/domain/task.repository";
 import { z } from "zod";
 
@@ -20,9 +23,10 @@ export class CreateTaskUseCase {
     private readonly eventEmitter = EventEmitter.use(),
   ) {}
 
-  @Observe("use-case")
-  @Validate(Input)
   async execute(input: Input) {
+    Guard.withSchema(Input, input);
+    using segment = addSegment("use-case", CreateTaskUseCase.name);
+
     const task = TaskEntity.create({
       title: input.title,
       description: input.description,
@@ -31,7 +35,9 @@ export class CreateTaskUseCase {
     this.eventEmitter.add(TaskCreatedDomainEvent.create(task));
     this.taskRepository.add(task, "create");
 
-    await this.unitOfWork.save([this.taskRepository], this.eventEmitter);
+    await segment.try(() =>
+      this.unitOfWork.save([this.taskRepository], this.eventEmitter),
+    );
 
     return task;
   }

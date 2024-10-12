@@ -1,3 +1,4 @@
+import { addSegment } from "@task-bot/core/shared/domain/observability";
 import { BasePostgresCommandRepository } from "@task-bot/core/shared/infrastructure/base-postgres-command.repository";
 import { DatabaseConnectionContext } from "@task-bot/core/shared/infrastructure/db-pool";
 import {
@@ -14,38 +15,58 @@ export class PostgresUserRepository
   extends BasePostgresCommandRepository<UserEntity>
   implements UserRepository
 {
-  constructor(protected readonly db = DatabaseConnectionContext.use()) {
-    super("tasks", db);
+  constructor(protected readonly db = DatabaseConnectionContext.use) {
+    super("users", db);
   }
 
   async save(): Promise<void> {
-    await Promise.all(
-      this.entities.map(({ entity, operation }) => {
-        return this.saveOne(entity, operation);
-      }),
+    using segment = addSegment(
+      "repository",
+      `${this.tableName}.${this.save.name}`,
+    );
+
+    await segment.try(() =>
+      Promise.all(
+        this.entities.map(({ entity, operation }) => {
+          return this.saveOne(entity, operation);
+        }),
+      ),
     );
   }
 
   async findOne(props: Pick<UserEntitySchema, "id">): Promise<UserEntity> {
-    const conn = await this.db.get();
-    const result = await conn.one(
-      sql.type(
-        UserRepositoryQuerySchema,
-      )`SELECT * FROM ${sql.identifier([this.tableName])} where id = ${props.id}`,
+    using segment = addSegment(
+      "repository",
+      `${this.tableName}.${this.findOne.name}`,
     );
-    return new UserEntity(result);
+    return segment.try(async () => {
+      const conn = await this.db().get();
+      const result = await conn.one(
+        sql.type(
+          UserRepositoryQuerySchema,
+        )`SELECT * FROM ${sql.identifier([this.tableName])} where id = ${props.id}`,
+      );
+      return new UserEntity(result);
+    });
   }
 
   async findByEmail(
     props: Pick<UserEntitySchema, "email">,
   ): Promise<UserEntity> {
-    const conn = await this.db.get();
-    const result = await conn.one(
-      sql.type(
-        UserRepositoryQuerySchema,
-      )`SELECT * FROM ${sql.identifier([this.tableName])} where email = ${props.email}`,
+    using segment = addSegment(
+      "repository",
+      `${this.tableName}.${this.findByEmail.name}`,
     );
-    return new UserEntity(result);
+
+    return segment.try(async () => {
+      const conn = await this.db().get();
+      const result = await conn.one(
+        sql.type(
+          UserRepositoryQuerySchema,
+        )`SELECT * FROM ${sql.identifier([this.tableName])} where email = ${props.email}`,
+      );
+      return new UserEntity(result);
+    });
   }
 }
 

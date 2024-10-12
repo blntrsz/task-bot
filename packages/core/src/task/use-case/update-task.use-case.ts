@@ -1,7 +1,7 @@
 import { EventEmitter } from "@task-bot/core/shared/domain/event-emitter";
-import { Observe } from "@task-bot/core/shared/domain/observability";
+import { addSegment } from "@task-bot/core/shared/domain/observability";
 import { UnitOfWork } from "@task-bot/core/shared/domain/unit-of-work";
-import { Validate } from "@task-bot/core/shared/use-cases/validate";
+import { Guard } from "@task-bot/core/shared/use-cases/guard";
 import { TaskDescriptionUpdatedDomainEvent } from "@task-bot/core/task/domain/events/task-description-updated.event";
 import { TaskStatusUpdatedDomainEvent } from "@task-bot/core/task/domain/events/task-status-updated.event";
 import { TaskTitleUpdatedDomainEvent } from "@task-bot/core/task/domain/events/task-title-updated.event";
@@ -31,12 +31,13 @@ export class UpdateTaskUseCase {
     private readonly eventEmitter = EventEmitter.use(),
   ) {}
 
-  @Observe("use-case")
-  @Validate(Input)
-  async execute(_input: Input) {
-    const input = Input.parse(_input);
+  async execute(input: Input) {
+    Guard.withSchema(Input, input);
+    using segment = addSegment("use-case", UpdateTaskUseCase.name);
 
-    let task = await this.taskRepository.findOne({ id: input.id });
+    let task = await segment.try(() =>
+      this.taskRepository.findOne({ id: input.id }),
+    );
 
     if (input.title) {
       task = task.fork({
@@ -61,7 +62,9 @@ export class UpdateTaskUseCase {
 
     this.taskRepository.add(task, "update");
 
-    await this.unitOfWork.save([this.taskRepository], this.eventEmitter);
+    await segment.try(() =>
+      this.unitOfWork.save([this.taskRepository], this.eventEmitter),
+    );
 
     return task;
   }

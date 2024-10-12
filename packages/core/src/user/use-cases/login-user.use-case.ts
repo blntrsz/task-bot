@@ -1,7 +1,6 @@
 import { EventEmitter } from "@task-bot/core/shared/domain/event-emitter";
-import { Observe } from "@task-bot/core/shared/domain/observability";
+import { addSegment } from "@task-bot/core/shared/domain/observability";
 import { UnitOfWork } from "@task-bot/core/shared/domain/unit-of-work";
-import { Validate } from "@task-bot/core/shared/use-cases/validate";
 import {
   Password,
   UserEntitySchema,
@@ -11,6 +10,7 @@ import { z } from "zod";
 import { PasswordValueObject } from "@task-bot/core/user/domain/password.value-object";
 import { SessionRepository } from "@task-bot/core/user/domain/session.repository";
 import { SessionEntity } from "../domain/session.entity";
+import { Guard } from "@task-bot/core/shared/use-cases/guard";
 
 const Input = UserEntitySchema.pick({
   email: true,
@@ -25,10 +25,13 @@ export class LoginUserUseCase {
     private readonly eventEmitter = EventEmitter.use(),
   ) {}
 
-  @Observe("use-case")
-  @Validate(Input)
   async execute(input: Input) {
-    const user = await this.userRepository.findByEmail(input);
+    Guard.withSchema(Input, input);
+    using segment = addSegment("use-case", LoginUserUseCase.name);
+
+    const user = await segment.try(() =>
+      this.userRepository.findByEmail(input),
+    );
 
     user.props.password.equals(PasswordValueObject.create(input));
     const session = SessionEntity.create({
@@ -40,7 +43,9 @@ export class LoginUserUseCase {
     this.userRepository.add(user, "create");
     this.sessionRepository.add(session, "create");
 
-    await this.unitOfWork.save([this.userRepository], this.eventEmitter);
+    await segment.try(() =>
+      this.unitOfWork.save([this.userRepository], this.eventEmitter),
+    );
 
     return user;
   }

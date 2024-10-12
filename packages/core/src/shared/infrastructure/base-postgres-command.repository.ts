@@ -4,6 +4,8 @@ import toSnakeCase from "lodash/snakeCase";
 import { Operation } from "@task-bot/core/shared/domain/base-repository";
 import { BaseValueObject } from "@task-bot/core/shared/domain/base-value-object";
 import { DatabaseConnection } from "./db-pool";
+import { addSegment } from "../domain/observability";
+import { FragmentSqlToken } from "slonik";
 
 export class BasePostgresCommandRepository<TEntity extends BaseEntity<any>> {
   entities: { operation: Operation; entity: TEntity }[] = [];
@@ -16,7 +18,7 @@ export class BasePostgresCommandRepository<TEntity extends BaseEntity<any>> {
 
   constructor(
     protected readonly tableName: string,
-    protected readonly db: DatabaseConnection,
+    protected readonly db: () => DatabaseConnection,
   ) {}
 
   async saveOne(entity: TEntity, operation: Operation) {
@@ -50,26 +52,42 @@ export class BasePostgresCommandRepository<TEntity extends BaseEntity<any>> {
   }
 
   private async create(entity: TEntity) {
-    const conn = await this.db.get();
+    using segment = addSegment(
+      "repository",
+      `${this.tableName}.${this.create.name}`,
+    );
     const [keys, values] = this.toPersistence(entity);
 
-    await conn.query(sql.typeAlias("void")`
+    await segment.try(async () => {
+      const conn = await this.db().get();
+      await conn.query(sql.typeAlias("void")`
       INSERT INTO ${sql.identifier([this.tableName])} (${sql.join(keys, sql.fragment`, `)})
       VALUES (${sql.join(values, sql.fragment`, `)})
     `);
+    });
   }
 
   private async delete(entity: TEntity): Promise<void> {
-    const conn = await this.db.get();
-    await conn.query(sql.typeAlias("void")`
+    using segment = addSegment(
+      "repository",
+      `${this.tableName}.${this.delete.name}`,
+    );
+    await segment.try(async () => {
+      const conn = await this.db().get();
+      await conn.query(sql.typeAlias("void")`
       DELETE FROM ${sql.identifier([this.tableName])} WHERE id = ${entity.props.id}
     `);
+    });
   }
 
   private async update(entity: TEntity): Promise<void> {
+    using segment = addSegment(
+      "repository",
+      `${this.tableName}.${this.update.name}`,
+    );
     const [keys, values] = this.toPersistence(entity);
 
-    const setClauses = [];
+    const setClauses: FragmentSqlToken[] = [];
 
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
@@ -79,11 +97,13 @@ export class BasePostgresCommandRepository<TEntity extends BaseEntity<any>> {
       );
     }
 
-    const conn = await this.db.get();
-    await conn.query(sql.typeAlias("void")`
+    await segment.try(async () => {
+      const conn = await this.db().get();
+      await conn.query(sql.typeAlias("void")`
       UPDATE ${sql.identifier([this.tableName])}
       SET ${sql.join(setClauses, sql.fragment`, `)}
       WHERE id = ${entity.props.id}
     `);
+    });
   }
 }

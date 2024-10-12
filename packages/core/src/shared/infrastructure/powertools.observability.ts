@@ -7,10 +7,6 @@ import { Logger } from "@aws-lambda-powertools/logger";
 import { Metrics } from "@aws-lambda-powertools/metrics";
 import { Tracer } from "@aws-lambda-powertools/tracer";
 
-LoggerContext;
-TracerContext;
-MetricsContext;
-
 export const SERVICE_NAME = "TaskBot";
 
 const logger = new Logger({ serviceName: SERVICE_NAME });

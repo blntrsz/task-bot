@@ -6,6 +6,7 @@ import {
   withTracerContext,
 } from "@task-bot/core/shared/infrastructure/powertools.observability";
 import { withPostgresTaskRepository } from "@task-bot/core/task/infrastructure/postgres.task.repository";
+import { withPostgresSessionRepository } from "@task-bot/core/user/infrastructure/postgres.session.repository";
 import { withPostgresUserRepository } from "@task-bot/core/user/infrastructure/postgres.user.repository";
 
 export const dependencies = [
@@ -16,6 +17,7 @@ export const dependencies = [
   withDatabaseConnection,
 
   withPostgresUserRepository,
+  withPostgresSessionRepository,
   withPostgresTaskRepository,
 
   withEventBridgeEventEmitter,

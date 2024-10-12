@@ -1,3 +1,4 @@
+import { addSegment } from "@task-bot/core/shared/domain/observability";
 import { BasePostgresCommandRepository } from "@task-bot/core/shared/infrastructure/base-postgres-command.repository";
 import { DatabaseConnectionContext } from "@task-bot/core/shared/infrastructure/db-pool";
 import {
@@ -16,45 +17,63 @@ export class PostgresTaskRepository
   extends BasePostgresCommandRepository<TaskEntity>
   implements TaskRepository
 {
-  constructor(protected readonly db = DatabaseConnectionContext.use()) {
+  constructor(protected readonly db = DatabaseConnectionContext.use) {
     super("tasks", db);
   }
 
   async save(): Promise<void> {
-    await Promise.all(
-      this.entities.map(({ entity, operation }) => {
-        return this.saveOne(entity, operation);
-      }),
+    using segment = addSegment(
+      "repository",
+      `${this.tableName}.${this.save.name}`,
     );
+    await segment.try(async () => {
+      await Promise.all(
+        this.entities.map(({ entity, operation }) => {
+          return this.saveOne(entity, operation);
+        }),
+      );
+    });
   }
 
   async findOne(props: Pick<TaskEntitySchema, "id">): Promise<TaskEntity> {
-    const conn = await this.db.get();
-    const result = await conn.one(
-      sql.type(
-        TaskRepositoryQuerySchema,
-      )`SELECT * FROM ${sql.identifier([this.tableName])} where id = ${props.id}`,
+    using segment = addSegment(
+      "repository",
+      `${this.tableName}.${this.findOne.name}`,
     );
-    return new TaskEntity(result);
+    return segment.try(async () => {
+      const conn = await this.db().get();
+      const result = await conn.one(
+        sql.type(
+          TaskRepositoryQuerySchema,
+        )`SELECT * FROM ${sql.identifier([this.tableName])} where id = ${props.id}`,
+      );
+      return new TaskEntity(result);
+    });
   }
 
   async list(options: PaginatedOptions): Promise<Paginated<TaskEntity>> {
-    const conn = await this.db.get();
-    const tasks = await conn.many(
-      sql.type(TaskRepositoryQuerySchema)`
+    using segment = addSegment(
+      "repository",
+      `${this.tableName}.${this.list.name}`,
+    );
+    return segment.try(async () => {
+      const conn = await this.db().get();
+      const tasks = await conn.many(
+        sql.type(TaskRepositoryQuerySchema)`
         SELECT * FROM ${sql.identifier([this.tableName])} 
         OFFSET ${options.pageNumber * options.pageSize} 
         LIMIT ${options.pageSize + 1}
       `,
-    );
-    return {
-      data: tasks
-        .slice(0, options.pageSize)
-        .map((task) => new TaskEntity(task)),
-      pageSize: options.pageSize,
-      pageNumber: options.pageNumber,
-      hasNextPage: tasks.length > options.pageSize,
-    };
+      );
+      return {
+        data: tasks
+          .slice(0, options.pageSize)
+          .map((task) => new TaskEntity(task)),
+        pageSize: options.pageSize,
+        pageNumber: options.pageNumber,
+        hasNextPage: tasks.length > options.pageSize,
+      };
+    });
   }
 }
 

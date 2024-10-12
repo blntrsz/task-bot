@@ -1,3 +1,4 @@
+import { addSegment } from "@task-bot/core/shared/domain/observability";
 import { BasePostgresCommandRepository } from "@task-bot/core/shared/infrastructure/base-postgres-command.repository";
 import { DatabaseConnectionContext } from "@task-bot/core/shared/infrastructure/db-pool";
 import {
@@ -14,28 +15,41 @@ export class PostgresSessionRepository
   extends BasePostgresCommandRepository<SessionEntity>
   implements SessionRepository
 {
-  constructor(protected readonly db = DatabaseConnectionContext.use()) {
-    super("tasks", db);
+  constructor(protected readonly db = DatabaseConnectionContext.use) {
+    super("sessions", db);
   }
 
   async save(): Promise<void> {
-    await Promise.all(
-      this.entities.map(({ entity, operation }) => {
-        return this.saveOne(entity, operation);
-      }),
+    using segment = addSegment(
+      "repository",
+      `${this.tableName}.${this.save.name}`,
+    );
+    await segment.try(() =>
+      Promise.all(
+        this.entities.map(({ entity, operation }) => {
+          return this.saveOne(entity, operation);
+        }),
+      ),
     );
   }
 
   async findOne(
     props: Pick<SessionEntitySchema, "id">,
   ): Promise<SessionEntity> {
-    const conn = await this.db.get();
-    const result = await conn.one(
-      sql.type(
-        SessionRepositoryQuerySchema,
-      )`SELECT * FROM ${sql.identifier([this.tableName])} where id = ${props.id}`,
+    using segment = addSegment(
+      "repository",
+      `${this.tableName}.${this.save.name}`,
     );
-    return new SessionEntity(result);
+
+    return segment.try(async () => {
+      const conn = await this.db().get();
+      const result = await conn.one(
+        sql.type(
+          SessionRepositoryQuerySchema,
+        )`SELECT * FROM ${sql.identifier([this.tableName])} where id = ${props.id}`,
+      );
+      return new SessionEntity(result);
+    });
   }
 }
 
