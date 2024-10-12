@@ -13,6 +13,9 @@ export const TaskSchema = BaseEntitySchema.merge(
     title: z.string().min(6).openapi({
       description: "The title of the Task.",
     }),
+    description: z.string().min(6).openapi({
+      description: "The title of the Task.",
+    }),
     status: z.nativeEnum(TaskStatus).openapi({
       description: "The status of the Task.",
     }),
@@ -24,6 +27,7 @@ export const TaskResponseSchema = BaseResponse(
   "tasks",
   TaskSchema.pick({
     title: true,
+    description: true,
     status: true,
   }),
 ).openapi({
@@ -33,6 +37,7 @@ export const TaskResponseSchema = BaseResponse(
     attributes: {
       status: TaskStatus.TO_DO,
       title: "My Task",
+      description: "My description",
       created_at: "2024-10-06T10:40:26.105Z",
       updated_at: "2024-10-06T10:40:26.105Z",
     },
@@ -50,9 +55,14 @@ export const CreateTaskSchema = TaskResponseSchema.pick({
 
 export type UpdateTaskSchema = z.infer<typeof UpdateTaskSchema>;
 export const UpdateTaskSchema = TaskResponseSchema.pick({
+  id: true,
   type: true,
 }).extend({
-  attributes: TaskResponseSchema.shape.attributes.pick({
-    title: true,
-  }),
+  attributes: TaskResponseSchema.shape.attributes
+    .pick({
+      title: true,
+      description: true,
+      status: true,
+    })
+    .partial(),
 });

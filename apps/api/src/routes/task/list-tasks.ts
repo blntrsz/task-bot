@@ -10,8 +10,8 @@ export const listTasks = new OpenAPIHono().openapi(
     tags: ["tasks"],
     request: {
       query: z.object({
-        "page[number]": z.number().min(1).default(1),
-        "page[size]": z.number().min(1).default(10),
+        "page[number]": z.coerce.number().min(1).default(1),
+        "page[size]": z.coerce.number().min(1).default(10),
       }),
     },
     responses: {

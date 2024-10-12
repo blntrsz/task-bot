@@ -1,14 +1,13 @@
 import { api } from "#lib/api-client";
 import { useMutation } from "@tanstack/react-query";
 import { taskKeys } from "./task-keys";
-import { useTaskRepository } from "../infrastructure/api.task.repository";
 
-export async function createTask(name: string) {
+export async function createTask(title: string) {
   const result = await api.tasks.$post({
     json: {
       type: taskKeys.all[0],
       attributes: {
-        name: name,
+        title,
       },
     },
   });
@@ -20,8 +19,7 @@ export async function createTask(name: string) {
 }
 
 export function useCreateTask() {
-  const repository = useTaskRepository();
   return useMutation({
-    mutationFn: repository.create,
+    mutationFn: createTask,
   });
 }

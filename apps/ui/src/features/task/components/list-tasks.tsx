@@ -8,7 +8,7 @@ export function ListTasks() {
   return (
     <ul>
       {tasks.data.data.map((task) => (
-        <li key={task.id}>{task.attributes.name}</li>
+        <li key={task.id}>{task.attributes.title}</li>
       ))}
     </ul>
   );

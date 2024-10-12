@@ -3,7 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { taskKeys } from "./task-keys";
 
 export async function listTasks() {
-  const result = await api.tasks.$get();
+  const result = await api.tasks.$get({
+    query: {
+      "page[size]": "50",
+      "page[number]": "1",
+    },
+  });
 
   if (!result.ok) throw result;
   const body = await result.json();

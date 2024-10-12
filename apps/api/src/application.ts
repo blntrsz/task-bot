@@ -9,6 +9,7 @@ import {
   LoggerContext,
   TracerContext,
 } from "@task-bot/core/shared/domain/observability";
+import { updateTask } from "./routes/task/update-task";
 
 export const app = new OpenAPIHono();
 
@@ -90,6 +91,7 @@ export const routes = app
   .route("/", createTask)
   .route("/", findOneTask)
   .route("/", deleteTask)
+  .route("/", updateTask)
 
   // user
   .route("/", createUser);
