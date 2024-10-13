@@ -1,6 +1,6 @@
-import { api } from "#lib/api-client";
 import { useQuery } from "@tanstack/react-query";
-import { taskKeys } from "./task-keys";
+import { taskKeys } from "./task";
+import { api } from "@task-bot/ui/lib/api-client";
 
 export async function getOneTask(id: string) {
   const result = await api.tasks[":id"].$get({

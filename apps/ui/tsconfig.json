@@ -8,7 +8,7 @@
     "moduleResolution": "Bundler",
     "baseUrl" : ".",
     "paths": {
-      "#*": ["./src/*"],
+      "@task-bot/ui/*": ["./src/*"],
     }
   }
 }

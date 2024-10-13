@@ -29,7 +29,8 @@ export function addSegment(key: string, value: string) {
     metrics,
     async try<T>(cb: () => Promise<T>) {
       try {
-        return await cb();
+        const result = await cb();
+        return result;
       } catch (error) {
         if (error instanceof Exception) {
           throw error;

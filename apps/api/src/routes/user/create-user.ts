@@ -1,6 +1,5 @@
-import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { CreateUserSchema, UserResponseSchema } from "../../types/user.types";
-import { Response } from "../../lib/types";
 import { addApiSegment } from "../../lib/create-api";
 import { SignUpUserUseCase } from "@task-bot/core/user/use-cases/sign-up-user.use-case";
 
@@ -21,7 +20,11 @@ export const createUser = new OpenAPIHono().openapi(
     responses: {
       201: {
         description: "Create",
-        content: Response(UserResponseSchema),
+        content: {
+          "application/json": {
+            schema: z.object({ data: UserResponseSchema }),
+          },
+        },
       },
     },
   }),

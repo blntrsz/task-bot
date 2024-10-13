@@ -1,5 +1,5 @@
 import { VerifyUserUseCase } from "@task-bot/core/user/use-cases/validate-session.use-case";
-import { deleteCookie, getCookie } from "hono/cookie";
+import { getCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
 
 export const authenticate = createMiddleware(async (c, next) => {
@@ -7,8 +7,15 @@ export const authenticate = createMiddleware(async (c, next) => {
   const isOpenApiPath = c.req.path === "/doc" && c.req.method === "GET";
   const isScalarPath = c.req.path === "/ui" && c.req.method === "GET";
   const isLoginRoute = c.req.path === "/login" && c.req.method === "POST";
+  const isOption = c.req.method === "OPTIONS";
 
-  if (isCreateUserPath || isOpenApiPath || isScalarPath || isLoginRoute) {
+  if (
+    isCreateUserPath ||
+    isOpenApiPath ||
+    isScalarPath ||
+    isLoginRoute ||
+    isOption
+  ) {
     return next();
   }
 
@@ -21,10 +28,7 @@ export const authenticate = createMiddleware(async (c, next) => {
       id: sessionId,
     })
     .then(next)
-    .catch((error) => {
-      deleteCookie(c, "_session");
-      console.error(error);
-
+    .catch(() => {
       throw new Error("Unauthorized");
     });
 });

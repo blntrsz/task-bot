@@ -2,7 +2,8 @@
   "name": "@task-bot/migrator",
   "version": "1.0.0",
   "scripts": {
-    "migrate": "node-pg-migrate"
+    "migrate": "node-pg-migrate",
+    "migrate:new": "node-pg-migrate create -j sql"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

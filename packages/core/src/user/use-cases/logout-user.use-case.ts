@@ -9,7 +9,6 @@ import { SessionEntitySchema } from "../domain/session.entity";
 
 const Input = SessionEntitySchema.pick({
   id: true,
-  userId: true,
 });
 type Input = z.infer<typeof Input>;
 
@@ -22,7 +21,7 @@ export class LogoutUserUseCase {
   ) {}
 
   async execute(input: Input) {
-    Guard.withSchema(Input, input);
+    Guard.assertSchema(Input, input);
     using segment = addUseCaseSegment(this);
 
     const result = await segment.try(async () => {

@@ -6,6 +6,7 @@ import {
   QueryResultRow,
   SchemaValidationError,
   DatabaseConnection as SlonikDatabaseConnection,
+  DatabasePool,
 } from "slonik";
 import { createQueryLoggingInterceptor } from "slonik-interceptor-query-logging";
 
@@ -15,7 +16,7 @@ const conditionalInterceptors =
     : [createQueryLoggingInterceptor()];
 
 export class DatabaseConnection {
-  private connection?: SlonikDatabaseConnection;
+  private connection?: SlonikDatabaseConnection | DatabasePool;
 
   constructor(conn?: SlonikDatabaseConnection) {
     this.connection = conn;

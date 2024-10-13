@@ -1,11 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
-import { taskKeys } from "./task";
+import { userKeys } from "./user";
 import { api } from "@task-bot/ui/lib/api-client";
 
-export async function createTask(attributes: { title: string, description: string }) {
-  const result = await api.tasks.$post({
+async function signIn(attributes: { email: string; password: string }) {
+  const result = await api.users.$post({
     json: {
-      type: taskKeys.all[0],
+      type: userKeys.all[0],
       attributes,
     },
   });
@@ -16,8 +16,8 @@ export async function createTask(attributes: { title: string, description: strin
   return body;
 }
 
-export function useCreateTask() {
+export function useSignUp() {
   return useMutation({
-    mutationFn: createTask,
+    mutationFn: signIn,
   });
 }

@@ -19,7 +19,7 @@ export class DeleteUserUseCase {
   ) {}
 
   async execute(input: Input) {
-    Guard.withSchema(Input, input);
+    Guard.assertSchema(Input, input);
     using segment = addUseCaseSegment(this);
 
     const result = await segment.try(async () => {

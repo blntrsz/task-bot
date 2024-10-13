@@ -1,5 +1,6 @@
-import { api } from "#lib/api-client";
 import { useMutation } from "@tanstack/react-query";
+import { taskKeys } from "./task";
+import { api } from "@task-bot/ui/lib/api-client";
 
 export enum TaskStatus {
   TO_DO = "to_do",
@@ -19,7 +20,7 @@ export async function updateTask(
     },
     json: {
       id,
-      type: "tasks",
+      type: taskKeys.all[0],
       attributes: {
         title,
         description,

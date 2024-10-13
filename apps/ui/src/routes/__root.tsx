@@ -1,13 +1,12 @@
-import { Notifications } from "../features/notification/components/notification";
 import { Link, Outlet, createRootRoute } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { Notifications } from "@task-bot/ui/features/notification";
 
 export const Route = createRootRoute({
-  component,
+  component: Component,
 });
 
-function component() {
+function Component() {
   return (
     <>
       <div className="p-2 flex gap-2 text-lg">
@@ -19,7 +18,7 @@ function component() {
           activeOptions={{ exact: true }}
         >
           Home
-        </Link>
+        </Link>{" "}
         <Link
           to="/about"
           activeProps={{
@@ -31,9 +30,8 @@ function component() {
       </div>
       <hr />
       <Outlet />
-      <TanStackRouterDevtools />
-      <ReactQueryDevtools />
       <Notifications />
+      <TanStackRouterDevtools position="bottom-right" />
     </>
   );
 }
