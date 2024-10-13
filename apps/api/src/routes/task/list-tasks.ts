@@ -2,7 +2,7 @@ import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { Response } from "../../lib/types";
 import { TaskRepository } from "@task-bot/core/task/domain/task.repository";
 import { TaskResponseSchema } from "../../types/task.types";
-import { addSegment } from "@task-bot/core/shared/domain/observability";
+import { addApiSegment } from "../../lib/create-api";
 
 export const listTasks = new OpenAPIHono().openapi(
   createRoute({
@@ -23,7 +23,7 @@ export const listTasks = new OpenAPIHono().openapi(
     },
   }),
   async (c) => {
-    using segment = addSegment("api", `${c.req.method} ${c.req.routePath}`);
+    using segment = addApiSegment(c);
     const query = c.req.valid("query");
     const tasks = await segment.try(() =>
       TaskRepository.use().list({
@@ -52,7 +52,7 @@ export const listTasks = new OpenAPIHono().openapi(
             ? null
             : `/tasks?${previousLinkQueryParam.toString()}`,
         next: tasks.hasNextPage
-          ? `/tasks${nextLinkQueryParam.toString()}`
+          ? `/tasks?${nextLinkQueryParam.toString()}`
           : null,
       },
     });

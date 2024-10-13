@@ -2,6 +2,7 @@ import { BaseEntity } from "@task-bot/core/shared/domain/base-entity";
 import { randomUUID } from "crypto";
 import { z } from "zod";
 import { PasswordValueObject } from "./password.value-object";
+import { entityToResponse } from "@task-bot/core/shared/domain/mapper";
 
 export const Password = z.object({
   password: z.string().min(8),
@@ -45,15 +46,6 @@ export class UserEntity extends BaseEntity<typeof UserEntitySchema> {
   }
 
   toResponse() {
-    const props = this.props;
-    return {
-      id: props.id,
-      type: "users" as const,
-      attributes: {
-        email: props.email,
-        created_at: props.createdAt.toISOString(),
-        updated_at: props.updatedAt.toISOString(),
-      },
-    };
+    return entityToResponse(this.props, "users");
   }
 }

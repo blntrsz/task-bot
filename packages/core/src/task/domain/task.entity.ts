@@ -1,4 +1,5 @@
 import { BaseEntity } from "@task-bot/core/shared/domain/base-entity";
+import { entityToResponse } from "@task-bot/core/shared/domain/mapper";
 import { randomUUID } from "crypto";
 import { z } from "zod";
 
@@ -48,16 +49,6 @@ export class TaskEntity extends BaseEntity<typeof TaskEntitySchema> {
   }
 
   toResponse() {
-    const props = this.props;
-    return {
-      id: props.id,
-      type: "tasks" as const,
-      attributes: {
-        title: props.title,
-        status: props.status,
-        created_at: props.createdAt.toISOString(),
-        updated_at: props.updatedAt.toISOString(),
-      },
-    };
+    return entityToResponse(this.props, "tasks");
   }
 }

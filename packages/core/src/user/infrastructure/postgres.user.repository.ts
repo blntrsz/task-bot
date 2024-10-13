@@ -5,10 +5,7 @@ import {
   UserEntity,
   UserEntitySchema,
 } from "@task-bot/core/user/domain/user.entity";
-import {
-  UserRepository,
-  UserRepositoryQuerySchema,
-} from "@task-bot/core/user/domain/user.repository";
+import { UserRepository } from "@task-bot/core/user/domain/user.repository";
 import { sql } from "slonik";
 
 export class PostgresUserRepository
@@ -16,7 +13,7 @@ export class PostgresUserRepository
   implements UserRepository
 {
   constructor(protected readonly db = DatabaseConnectionContext.use) {
-    super("users", db);
+    super("users");
   }
 
   async save(): Promise<void> {
@@ -43,7 +40,7 @@ export class PostgresUserRepository
       const conn = await this.db().get();
       const result = await conn.one(
         sql.type(
-          UserRepositoryQuerySchema,
+          UserEntitySchema,
         )`SELECT * FROM ${sql.identifier([this.tableName])} where id = ${props.id}`,
       );
       return new UserEntity(result);
@@ -62,7 +59,7 @@ export class PostgresUserRepository
       const conn = await this.db().get();
       const result = await conn.one(
         sql.type(
-          UserRepositoryQuerySchema,
+          UserEntitySchema,
         )`SELECT * FROM ${sql.identifier([this.tableName])} where email = ${props.email}`,
       );
       return new UserEntity(result);

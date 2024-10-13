@@ -18,7 +18,7 @@ const Input = TaskEntitySchema.pick({
   .partial({ title: true, description: true, status: true })
   .refine(
     (val) => {
-      return val.description || val.title;
+      return val.description || val.title || val.status;
     },
     { message: "At least one property should be updated." },
   );

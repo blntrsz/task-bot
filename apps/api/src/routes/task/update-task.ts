@@ -2,7 +2,7 @@ import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { Response } from "../../lib/types";
 import { TaskResponseSchema, UpdateTaskSchema } from "../../types/task.types";
 import { UpdateTaskUseCase } from "@task-bot/core/task/use-case/update-task.use-case";
-import { addSegment } from "@task-bot/core/shared/domain/observability";
+import { addApiSegment } from "../../lib/create-api";
 
 const ResponseSchema = TaskResponseSchema;
 
@@ -29,7 +29,7 @@ export const updateTask = new OpenAPIHono().openapi(
     },
   }),
   async (c) => {
-    using segment = addSegment("api", `${c.req.method} ${c.req.routePath}`);
+    using segment = addApiSegment(c);
     const { id, attributes } = c.req.valid("json");
 
     const task = await segment.try(() =>

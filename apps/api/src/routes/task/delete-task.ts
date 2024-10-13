@@ -2,7 +2,7 @@ import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { Response } from "../../lib/types";
 import { DeleteTaskUseCase } from "@task-bot/core/task/use-case/delete-task.use-case";
 import { TaskResponseSchema } from "../../types/task.types";
-import { addSegment } from "@task-bot/core/shared/domain/observability";
+import { addApiSegment } from "../../lib/create-api";
 
 const ResponseSchema = TaskResponseSchema.pick({ id: true, type: true });
 
@@ -24,7 +24,7 @@ export const deleteTask = new OpenAPIHono().openapi(
     },
   }),
   async (c) => {
-    using segment = addSegment("api", `${c.req.method} ${c.req.routePath}`);
+    using segment = addApiSegment(c);
     const { id } = c.req.valid("param");
 
     const task = await segment.try(() =>

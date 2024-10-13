@@ -10,6 +10,7 @@ import {
   TracerContext,
 } from "@task-bot/core/shared/domain/observability";
 import { updateTask } from "./routes/task/update-task";
+import { VerifyUserUseCase } from "@task-bot/core/user/use-cases/verify-user.use-case";
 
 export const app = new OpenAPIHono();
 
@@ -21,6 +22,9 @@ app.use(async (c, next) => {
   if (isCreateUserPath || isOpenApiPath || isScalarPath) {
     return next();
   }
+  // new VerifyUserUseCase().execute({
+  //   id,
+  // });
   // const session = getCookie(c, "_session") ?? "";
   // const userId = getCookie(c, "_userid") ?? "";
   //

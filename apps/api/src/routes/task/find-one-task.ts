@@ -2,7 +2,7 @@ import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { Response } from "../../lib/types";
 import { TaskRepository } from "@task-bot/core/task/domain/task.repository";
 import { TaskResponseSchema, TaskSchema } from "../../types/task.types";
-import { addSegment } from "@task-bot/core/shared/domain/observability";
+import { addApiSegment } from "../../lib/create-api";
 
 const ResponseSchema = TaskResponseSchema;
 
@@ -22,7 +22,7 @@ export const findOneTask = new OpenAPIHono().openapi(
     },
   }),
   async (c) => {
-    using segment = addSegment("api", `${c.req.method} ${c.req.routePath}`);
+    using segment = addApiSegment(c);
     const param = c.req.valid("param");
     const task = await segment.try(() => TaskRepository.use().findOne(param));
 

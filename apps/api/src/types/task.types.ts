@@ -50,6 +50,7 @@ export const CreateTaskSchema = TaskResponseSchema.pick({
 }).extend({
   attributes: TaskResponseSchema.shape.attributes.pick({
     title: true,
+    description: true,
   }),
 });
 

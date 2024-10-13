@@ -8,6 +8,7 @@ import {
 import { withPostgresTaskRepository } from "@task-bot/core/task/infrastructure/postgres.task.repository";
 import { withPostgresSessionRepository } from "@task-bot/core/user/infrastructure/postgres.session.repository";
 import { withPostgresUserRepository } from "@task-bot/core/user/infrastructure/postgres.user.repository";
+import { withPostgresUnitOfWork } from "@task-bot/core/shared/infrastructure/postgres.unit-of-work";
 
 export const dependencies = [
   withLoggerContext,
@@ -15,6 +16,7 @@ export const dependencies = [
   withMetricsContext,
 
   withDatabaseConnection,
+  withPostgresUnitOfWork,
 
   withPostgresUserRepository,
   withPostgresSessionRepository,

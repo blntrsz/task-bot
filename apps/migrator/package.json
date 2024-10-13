@@ -1,0 +1,14 @@
+{
+  "name": "@task-bot/migrator",
+  "version": "1.0.0",
+  "scripts": {
+    "migrate": "node-pg-migrate"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "pg": "^8.13.0"
+  },
+  "devDependencies": {
+    "node-pg-migrate": "^7.7.1"
+  }
+}

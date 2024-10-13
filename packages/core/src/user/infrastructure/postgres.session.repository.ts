@@ -5,10 +5,7 @@ import {
   SessionEntity,
   SessionEntitySchema,
 } from "@task-bot/core/user/domain/session.entity";
-import {
-  SessionRepository,
-  SessionRepositoryQuerySchema,
-} from "@task-bot/core/user/domain/session.repository";
+import { SessionRepository } from "@task-bot/core/user/domain/session.repository";
 import { sql } from "slonik";
 
 export class PostgresSessionRepository
@@ -16,7 +13,7 @@ export class PostgresSessionRepository
   implements SessionRepository
 {
   constructor(protected readonly db = DatabaseConnectionContext.use) {
-    super("sessions", db);
+    super("sessions");
   }
 
   async save(): Promise<void> {
@@ -34,7 +31,7 @@ export class PostgresSessionRepository
   }
 
   async findOne(
-    props: Pick<SessionEntitySchema, "id">,
+    props: Pick<SessionEntitySchema, "id" | "userId">,
   ): Promise<SessionEntity> {
     using segment = addSegment(
       "repository",
@@ -45,8 +42,8 @@ export class PostgresSessionRepository
       const conn = await this.db().get();
       const result = await conn.one(
         sql.type(
-          SessionRepositoryQuerySchema,
-        )`SELECT * FROM ${sql.identifier([this.tableName])} where id = ${props.id}`,
+          SessionEntitySchema,
+        )`SELECT * FROM ${sql.identifier([this.tableName])} where id = ${props.id} AND user_id = ${props.userId}`,
       );
       return new SessionEntity(result);
     });

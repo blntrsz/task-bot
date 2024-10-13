@@ -1,7 +1,5 @@
-import { z } from "zod";
 import { UserEntity, UserEntitySchema } from "./user.entity";
 import { BaseRepository } from "@task-bot/core/shared/domain/base-repository";
-import { objectToCamelCase } from "@task-bot/core/shared/infrastructure/util";
 import { createContext } from "@task-bot/core/shared/contex";
 
 export interface UserRepository extends BaseRepository<UserEntity> {
@@ -10,8 +8,3 @@ export interface UserRepository extends BaseRepository<UserEntity> {
 }
 
 export const UserRepository = createContext<UserRepository>();
-
-export const UserRepositoryQuerySchema = z.preprocess(
-  objectToCamelCase,
-  UserEntitySchema,
-);

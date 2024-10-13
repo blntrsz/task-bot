@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx ./src/dev.ts",
+    "dev": "ROARR_LOG=true tsx watch ./src/dev.ts",
     "typecheck": "tsc --noEmit",
     "build": "esbuild --bundle --outfile=./dist/index.js --platform=node --target=node20 ./src/index.ts",
     "zip": "zip -j lambda.zip dist/index.js",
@@ -11,15 +11,16 @@
     "deploy": "run-s build zip update"
   },
   "devDependencies": {
+    "dotenv": "^16.4.5",
     "esbuild": "^0.24.0",
     "npm-run-all2": "^6.2.3",
     "typescript": "^5.6.2"
   },
   "dependencies": {
-    "@task-bot/core": "workspace:*",
     "@hono/node-server": "^1.13.1",
     "@hono/zod-openapi": "^0.16.3",
     "@scalar/hono-api-reference": "^0.5.150",
+    "@task-bot/core": "workspace:*",
     "@tsconfig/node20": "^20.1.4",
     "hono": "^4.6.3",
     "nodemon": "^3.1.7",

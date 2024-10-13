@@ -9,7 +9,6 @@ import {
   Paginated,
   PaginatedOptions,
   TaskRepository,
-  TaskRepositoryQuerySchema,
 } from "@task-bot/core/task/domain/task.repository";
 import { sql } from "slonik";
 
@@ -18,7 +17,7 @@ export class PostgresTaskRepository
   implements TaskRepository
 {
   constructor(protected readonly db = DatabaseConnectionContext.use) {
-    super("tasks", db);
+    super("tasks");
   }
 
   async save(): Promise<void> {
@@ -44,7 +43,7 @@ export class PostgresTaskRepository
       const conn = await this.db().get();
       const result = await conn.one(
         sql.type(
-          TaskRepositoryQuerySchema,
+          TaskEntitySchema,
         )`SELECT * FROM ${sql.identifier([this.tableName])} where id = ${props.id}`,
       );
       return new TaskEntity(result);
@@ -58,20 +57,20 @@ export class PostgresTaskRepository
     );
     return await segment.try(async () => {
       const conn = await this.db().get();
-      const tasks = await conn.many(
-        sql.type(TaskRepositoryQuerySchema)`
+      const tasks = await conn.query(
+        sql.type(TaskEntitySchema)`
         SELECT * FROM ${sql.identifier([this.tableName])} 
-        OFFSET ${options.pageNumber * options.pageSize} 
+        OFFSET ${(options.pageNumber - 1) * options.pageSize} 
         LIMIT ${options.pageSize + 1}
       `,
       );
       return {
-        data: tasks
+        data: tasks.rows
           .slice(0, options.pageSize)
           .map((task) => new TaskEntity(task)),
         pageSize: options.pageSize,
         pageNumber: options.pageNumber,
-        hasNextPage: tasks.length > options.pageSize,
+        hasNextPage: tasks.rowCount > options.pageSize,
       };
     });
   }

@@ -3,7 +3,7 @@ import { sql } from "slonik";
 import toSnakeCase from "lodash/snakeCase";
 import { Operation } from "@task-bot/core/shared/domain/base-repository";
 import { BaseValueObject } from "@task-bot/core/shared/domain/base-value-object";
-import { DatabaseConnection } from "./db-pool";
+import { DatabaseConnectionContext } from "./db-pool";
 import { addSegment } from "../domain/observability";
 import { FragmentSqlToken } from "slonik";
 
@@ -18,7 +18,7 @@ export class BasePostgresCommandRepository<TEntity extends BaseEntity<any>> {
 
   constructor(
     protected readonly tableName: string,
-    protected readonly db: () => DatabaseConnection,
+    protected readonly db = DatabaseConnectionContext.use,
   ) {}
 
   async saveOne(entity: TEntity, operation: Operation) {
@@ -38,14 +38,16 @@ export class BasePostgresCommandRepository<TEntity extends BaseEntity<any>> {
     for (const [key, value] of Object.entries(entity.props)) {
       if (value instanceof BaseValueObject) {
         for (const [voKey, voValue] of Object.entries(value.props)) {
-          keys.push(voKey);
-          values.push(voValue);
+          keys.push(toSnakeCase(voKey));
+          values.push(
+            voValue instanceof Date ? voValue.toISOString() : voValue,
+          );
         }
         continue;
       }
 
       keys.push(toSnakeCase(key));
-      values.push(toSnakeCase(value));
+      values.push(value instanceof Date ? value.toISOString() : value);
     }
 
     return [keys, values];
@@ -57,13 +59,19 @@ export class BasePostgresCommandRepository<TEntity extends BaseEntity<any>> {
       `${this.tableName}.${this.create.name}`,
     );
     const [keys, values] = this.toPersistence(entity);
+    console.log({ keys, values });
 
     await segment.try(async () => {
       const conn = await this.db().get();
-      await conn.query(sql.typeAlias("void")`
-      INSERT INTO ${sql.identifier([this.tableName])} (${sql.join(keys, sql.fragment`, `)})
+      const query = sql.unsafe`
+      INSERT INTO ${sql.identifier([this.tableName])} (${sql.join(
+        keys.map((key) => sql.identifier([key])),
+        sql.fragment`, `,
+      )})
       VALUES (${sql.join(values, sql.fragment`, `)})
-    `);
+    `;
+      console.log({ query: query.sql, values: query.values });
+      await conn.query(query);
     });
   }
 
@@ -74,7 +82,7 @@ export class BasePostgresCommandRepository<TEntity extends BaseEntity<any>> {
     );
     await segment.try(async () => {
       const conn = await this.db().get();
-      await conn.query(sql.typeAlias("void")`
+      await conn.query(sql.unsafe`
       DELETE FROM ${sql.identifier([this.tableName])} WHERE id = ${entity.props.id}
     `);
     });
@@ -99,7 +107,7 @@ export class BasePostgresCommandRepository<TEntity extends BaseEntity<any>> {
 
     await segment.try(async () => {
       const conn = await this.db().get();
-      await conn.query(sql.typeAlias("void")`
+      await conn.query(sql.unsafe`
       UPDATE ${sql.identifier([this.tableName])}
       SET ${sql.join(setClauses, sql.fragment`, `)}
       WHERE id = ${entity.props.id}
