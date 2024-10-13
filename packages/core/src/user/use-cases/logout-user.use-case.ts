@@ -1,5 +1,5 @@
 import { EventEmitter } from "@task-bot/core/shared/domain/event-emitter";
-import { addSegment } from "@task-bot/core/shared/domain/observability";
+import { addUseCaseSegment } from "@task-bot/core/shared/domain/observability";
 import { UnitOfWork } from "@task-bot/core/shared/domain/unit-of-work";
 import { UserRepository } from "@task-bot/core/user/domain/user.repository";
 import { z } from "zod";
@@ -23,18 +23,18 @@ export class LogoutUserUseCase {
 
   async execute(input: Input) {
     Guard.withSchema(Input, input);
-    using segment = addSegment("use-case", LogoutUserUseCase.name);
+    using segment = addUseCaseSegment(this);
 
-    const session = await segment.try(() =>
-      this.sessionRepository.findOne(input),
-    );
+    const result = await segment.try(async () => {
+      const session = await this.sessionRepository.findOne(input);
 
-    // TODO
-    // this.eventEmitter.add(UserCreatedDomainEvent.create(user));
-    this.sessionRepository.add(session, "create");
+      // TODO
+      // this.eventEmitter.add(UserCreatedDomainEvent.create(user));
+      this.sessionRepository.add(session, "delete");
 
-    await segment.try(() =>
-      this.unitOfWork.save([this.userRepository], this.eventEmitter),
-    );
+      await this.unitOfWork.save([this.userRepository], this.eventEmitter);
+    });
+
+    return result;
   }
 }

@@ -1,5 +1,5 @@
 import { EventEmitter } from "@task-bot/core/shared/domain/event-emitter";
-import { addSegment } from "@task-bot/core/shared/domain/observability";
+import { addUseCaseSegment } from "@task-bot/core/shared/domain/observability";
 import { UnitOfWork } from "@task-bot/core/shared/domain/unit-of-work";
 import {
   Password,
@@ -27,26 +27,25 @@ export class LoginUserUseCase {
 
   async execute(input: Input) {
     Guard.withSchema(Input, input);
-    using segment = addSegment("use-case", LoginUserUseCase.name);
+    using segment = addUseCaseSegment(this);
 
-    const user = await segment.try(() =>
-      this.userRepository.findByEmail(input),
-    );
+    const result = await segment.try(async () => {
+      const user = await this.userRepository.findByEmail(input);
 
-    user.props.password.equals(PasswordValueObject.create(input));
-    const session = SessionEntity.create({
-      userId: user.props.id,
+      user.password.equals(PasswordValueObject.create(input));
+      const session = SessionEntity.create({
+        userId: user.props.id,
+      });
+
+      // TODO
+      // this.eventEmitter.add(UserCreatedDomainEvent.create(user));
+      this.sessionRepository.add(session, "create");
+
+      await this.unitOfWork.save([this.sessionRepository], this.eventEmitter);
+
+      return { user, session };
     });
 
-    // TODO
-    // this.eventEmitter.add(UserCreatedDomainEvent.create(user));
-    this.userRepository.add(user, "create");
-    this.sessionRepository.add(session, "create");
-
-    await segment.try(() =>
-      this.unitOfWork.save([this.userRepository], this.eventEmitter),
-    );
-
-    return user;
+    return result;
   }
 }

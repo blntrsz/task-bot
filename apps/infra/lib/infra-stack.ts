@@ -51,7 +51,7 @@ export class InfraStack extends cdk.Stack {
       },
     });
 
-    const api = new HttpApi(this, "api", {});
+    const api = new HttpApi(this, "api");
 
     api.addRoutes({
       path: "/{proxy+}",

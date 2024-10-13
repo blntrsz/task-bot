@@ -1,8 +1,8 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { CreateUserSchema, UserResponseSchema } from "../../types/user.types";
-import { CreateUserUseCase } from "@task-bot/core/user/use-cases/create-user.use-case";
 import { Response } from "../../lib/types";
 import { addApiSegment } from "../../lib/create-api";
+import { SignUpUserUseCase } from "@task-bot/core/user/use-cases/sign-up-user.use-case";
 
 export const createUser = new OpenAPIHono().openapi(
   createRoute({
@@ -32,7 +32,7 @@ export const createUser = new OpenAPIHono().openapi(
     } = c.req.valid("json");
 
     const user = await segment.try(() =>
-      new CreateUserUseCase().execute({
+      new SignUpUserUseCase().execute({
         email,
         password,
       }),

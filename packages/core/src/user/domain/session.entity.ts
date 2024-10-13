@@ -8,7 +8,7 @@ import {
 import { sha256 } from "@oslojs/crypto/sha2";
 
 export const SessionEntitySchema = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
   userId: UserEntitySchema.shape.id,
   createdAt: z.coerce.date(),
   expiresAt: z.coerce.date(),
@@ -31,6 +31,10 @@ export class SessionEntity extends BaseEntity<typeof SessionEntitySchema> {
       createdAt: now,
       expiresAt: new Date(Date.now() + THIRTY_DAYS_IN_MS),
     });
+  }
+
+  static tokenToSessionId(token: string) {
+    return encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
   }
 
   isExpired() {

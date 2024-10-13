@@ -1,5 +1,5 @@
 import { EventEmitter } from "@task-bot/core/shared/domain/event-emitter";
-import { addSegment } from "@task-bot/core/shared/domain/observability";
+import { addUseCaseSegment } from "@task-bot/core/shared/domain/observability";
 import { UnitOfWork } from "@task-bot/core/shared/domain/unit-of-work";
 import { Guard } from "@task-bot/core/shared/use-cases/guard";
 import { TaskCreatedDomainEvent } from "@task-bot/core/task/domain/events/task-created.event";
@@ -25,20 +25,22 @@ export class CreateTaskUseCase {
 
   async execute(input: Input) {
     Guard.withSchema(Input, input);
-    using segment = addSegment("use-case", CreateTaskUseCase.name);
+    using segment = addUseCaseSegment(this);
 
-    const task = TaskEntity.create({
-      title: input.title,
-      description: input.description,
+    const result = await segment.try(async () => {
+      const task = TaskEntity.create({
+        title: input.title,
+        description: input.description,
+      });
+
+      this.eventEmitter.add(TaskCreatedDomainEvent.create(task));
+      this.taskRepository.add(task, "create");
+
+      await this.unitOfWork.save([this.taskRepository], this.eventEmitter);
+
+      return task;
     });
 
-    this.eventEmitter.add(TaskCreatedDomainEvent.create(task));
-    this.taskRepository.add(task, "create");
-
-    await segment.try(() =>
-      this.unitOfWork.save([this.taskRepository], this.eventEmitter),
-    );
-
-    return task;
+    return result;
   }
 }

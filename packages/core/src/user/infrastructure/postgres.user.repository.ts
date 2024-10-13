@@ -1,4 +1,4 @@
-import { addSegment } from "@task-bot/core/shared/domain/observability";
+import { addRepositorySegment } from "@task-bot/core/shared/domain/observability";
 import { BasePostgresCommandRepository } from "@task-bot/core/shared/infrastructure/base-postgres-command.repository";
 import { DatabaseConnectionContext } from "@task-bot/core/shared/infrastructure/db-pool";
 import {
@@ -17,10 +17,7 @@ export class PostgresUserRepository
   }
 
   async save(): Promise<void> {
-    using segment = addSegment(
-      "repository",
-      `${this.tableName}.${this.save.name}`,
-    );
+    using segment = addRepositorySegment(this.tableName, this.save);
 
     await segment.try(() =>
       Promise.all(
@@ -32,10 +29,8 @@ export class PostgresUserRepository
   }
 
   async findOne(props: Pick<UserEntitySchema, "id">): Promise<UserEntity> {
-    using segment = addSegment(
-      "repository",
-      `${this.tableName}.${this.findOne.name}`,
-    );
+    using segment = addRepositorySegment(this.tableName, this.findOne);
+
     return await segment.try(async () => {
       const conn = await this.db().get();
       const result = await conn.one(
@@ -50,10 +45,7 @@ export class PostgresUserRepository
   async findByEmail(
     props: Pick<UserEntitySchema, "email">,
   ): Promise<UserEntity> {
-    using segment = addSegment(
-      "repository",
-      `${this.tableName}.${this.findByEmail.name}`,
-    );
+    using segment = addRepositorySegment(this.tableName, this.findByEmail);
 
     return segment.try(async () => {
       const conn = await this.db().get();

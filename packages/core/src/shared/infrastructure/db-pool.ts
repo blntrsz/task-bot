@@ -9,6 +9,11 @@ import {
 } from "slonik";
 import { createQueryLoggingInterceptor } from "slonik-interceptor-query-logging";
 
+const conditionalInterceptors =
+  process.env.NODE_ENV === "production"
+    ? []
+    : [createQueryLoggingInterceptor()];
+
 export class DatabaseConnection {
   private connection?: SlonikDatabaseConnection;
 
@@ -24,8 +29,8 @@ export class DatabaseConnection {
         createFieldNameTransformationInterceptor({
           format: "CAMEL_CASE",
         }),
-        createQueryLoggingInterceptor(),
         createResultParserInterceptor(),
+        ...conditionalInterceptors,
       ],
     });
 

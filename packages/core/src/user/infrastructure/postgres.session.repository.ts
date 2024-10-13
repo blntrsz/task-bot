@@ -1,4 +1,4 @@
-import { addSegment } from "@task-bot/core/shared/domain/observability";
+import { addRepositorySegment } from "@task-bot/core/shared/domain/observability";
 import { BasePostgresCommandRepository } from "@task-bot/core/shared/infrastructure/base-postgres-command.repository";
 import { DatabaseConnectionContext } from "@task-bot/core/shared/infrastructure/db-pool";
 import {
@@ -17,10 +17,7 @@ export class PostgresSessionRepository
   }
 
   async save(): Promise<void> {
-    using segment = addSegment(
-      "repository",
-      `${this.tableName}.${this.save.name}`,
-    );
+    using segment = addRepositorySegment(this.tableName, this.save);
     await segment.try(() =>
       Promise.all(
         this.entities.map(({ entity, operation }) => {
@@ -33,17 +30,14 @@ export class PostgresSessionRepository
   async findOne(
     props: Pick<SessionEntitySchema, "id" | "userId">,
   ): Promise<SessionEntity> {
-    using segment = addSegment(
-      "repository",
-      `${this.tableName}.${this.save.name}`,
-    );
+    using segment = addRepositorySegment(this.tableName, this.findOne);
 
     return await segment.try(async () => {
       const conn = await this.db().get();
       const result = await conn.one(
         sql.type(
           SessionEntitySchema,
-        )`SELECT * FROM ${sql.identifier([this.tableName])} where id = ${props.id} AND user_id = ${props.userId}`,
+        )`SELECT * FROM ${sql.identifier([this.tableName])} where id = ${props.id}`,
       );
       return new SessionEntity(result);
     });

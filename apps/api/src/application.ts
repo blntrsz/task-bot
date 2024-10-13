@@ -5,71 +5,21 @@ import { findOneTask } from "./routes/task/find-one-task";
 import { apiReference } from "@scalar/hono-api-reference";
 import { deleteTask } from "./routes/task/delete-task";
 import { createUser } from "./routes/user/create-user";
-import {
-  LoggerContext,
-  TracerContext,
-} from "@task-bot/core/shared/domain/observability";
 import { updateTask } from "./routes/task/update-task";
-import { VerifyUserUseCase } from "@task-bot/core/user/use-cases/verify-user.use-case";
+import { addCorrelationHeaders } from "./middlewares/add-correation-headers";
+import { authenticate } from "./middlewares/authenticate";
+import { handleError } from "./middlewares/handle-error";
+import { loginUser } from "./routes/user/login-user";
 
 export const app = new OpenAPIHono();
 
-app.use(async (c, next) => {
-  const isCreateUserPath = c.req.path === "/users" && c.req.method === "POST";
-  const isOpenApiPath = c.req.path === "/doc" && c.req.method === "GET";
-  const isScalarPath = c.req.path === "/ui" && c.req.method === "GET";
-
-  if (isCreateUserPath || isOpenApiPath || isScalarPath) {
-    return next();
-  }
-  // new VerifyUserUseCase().execute({
-  //   id,
-  // });
-  // const session = getCookie(c, "_session") ?? "";
-  // const userId = getCookie(c, "_userid") ?? "";
-  //
-  // await new VerifyUserSessionUseCase().execute({
-  //   session,
-  //   id: userId,
-  // });
-
-  return next();
+app.use(addCorrelationHeaders).use(authenticate);
+app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
+  type: "http",
+  scheme: "bearer",
 });
 
-app.onError(async (error, c) => {
-  const tracer = TracerContext.use();
-  const logger = LoggerContext.use();
-
-  if ("getResponse" in error) {
-    const response = error.getResponse();
-    logger.error(await response.text());
-
-    return response;
-  }
-
-  // @ts-expect-error -- no traced type
-  if (!error.traced) {
-    tracer.addErrorAsMetadata(error);
-    logger.error(error.message);
-  }
-
-  // if (error instanceof Exception) {
-  //   const { json, status } = exceptionToResponse(error);
-  //   return c.json(json, status as StatusCode);
-  // }
-
-  return c.json(
-    {
-      errors: [
-        {
-          id: tracer.getRootXrayTraceId(),
-          message: error.message,
-        },
-      ],
-    },
-    500,
-  );
-});
+handleError(app);
 
 app.doc("/doc", {
   openapi: "3.0.0",
@@ -96,4 +46,5 @@ export const routes = app
   .route("/", updateTask)
 
   // user
-  .route("/", createUser);
+  .route("/", createUser)
+  .route("/", loginUser);

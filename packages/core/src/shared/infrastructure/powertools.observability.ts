@@ -9,7 +9,7 @@ import { Tracer } from "@aws-lambda-powertools/tracer";
 
 export const SERVICE_NAME = "TaskBot";
 
-const logger = new Logger({ serviceName: SERVICE_NAME });
+const logger = new Logger({ serviceName: SERVICE_NAME, environment: "dev" });
 const tracer = new Tracer({ serviceName: SERVICE_NAME });
 const metrics = new Metrics({
   serviceName: SERVICE_NAME,

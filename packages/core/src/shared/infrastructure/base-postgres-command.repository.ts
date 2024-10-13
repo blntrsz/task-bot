@@ -4,7 +4,7 @@ import toSnakeCase from "lodash/snakeCase";
 import { Operation } from "@task-bot/core/shared/domain/base-repository";
 import { BaseValueObject } from "@task-bot/core/shared/domain/base-value-object";
 import { DatabaseConnectionContext } from "./db-pool";
-import { addSegment } from "../domain/observability";
+import { addRepositorySegment } from "../domain/observability";
 import { FragmentSqlToken } from "slonik";
 
 export class BasePostgresCommandRepository<TEntity extends BaseEntity<any>> {
@@ -54,12 +54,8 @@ export class BasePostgresCommandRepository<TEntity extends BaseEntity<any>> {
   }
 
   private async create(entity: TEntity) {
-    using segment = addSegment(
-      "repository",
-      `${this.tableName}.${this.create.name}`,
-    );
+    using segment = addRepositorySegment(this.tableName, this.create);
     const [keys, values] = this.toPersistence(entity);
-    console.log({ keys, values });
 
     await segment.try(async () => {
       const conn = await this.db().get();
@@ -70,16 +66,12 @@ export class BasePostgresCommandRepository<TEntity extends BaseEntity<any>> {
       )})
       VALUES (${sql.join(values, sql.fragment`, `)})
     `;
-      console.log({ query: query.sql, values: query.values });
       await conn.query(query);
     });
   }
 
   private async delete(entity: TEntity): Promise<void> {
-    using segment = addSegment(
-      "repository",
-      `${this.tableName}.${this.delete.name}`,
-    );
+    using segment = addRepositorySegment(this.tableName, this.delete);
     await segment.try(async () => {
       const conn = await this.db().get();
       await conn.query(sql.unsafe`
@@ -89,10 +81,7 @@ export class BasePostgresCommandRepository<TEntity extends BaseEntity<any>> {
   }
 
   private async update(entity: TEntity): Promise<void> {
-    using segment = addSegment(
-      "repository",
-      `${this.tableName}.${this.update.name}`,
-    );
+    using segment = addRepositorySegment(this.tableName, this.update);
     const [keys, values] = this.toPersistence(entity);
 
     const setClauses: FragmentSqlToken[] = [];

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "ROARR_LOG=true tsx watch ./src/dev.ts",
+    "dev": "ROARR_LOG=true tsx watch ./src/dev.ts | roarr pretty-print",
     "typecheck": "tsc --noEmit",
     "build": "esbuild --bundle --outfile=./dist/index.js --platform=node --target=node20 ./src/index.ts",
     "zip": "zip -j lambda.zip dist/index.js",
@@ -19,6 +19,7 @@
   "dependencies": {
     "@hono/node-server": "^1.13.1",
     "@hono/zod-openapi": "^0.16.3",
+    "@roarr/cli": "^5.12.4",
     "@scalar/hono-api-reference": "^0.5.150",
     "@task-bot/core": "workspace:*",
     "@tsconfig/node20": "^20.1.4",
